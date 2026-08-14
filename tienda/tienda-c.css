@@ -102,3 +102,4 @@
 .skip-link:focus { left: 0; }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--secondary-light); outline-offset: 2px; }
 .cuenta-legal { font-size: 0.74rem; color: var(--muted); margin-top: 10px; }
+.orden-label { font-size: 0.84rem; color: var(--muted); font-weight: 600; margin-right: -6px; }

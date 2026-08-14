@@ -57,7 +57,7 @@
     <nav class="nav">
         <div class="nav-inner">
             <a href="../index.html" class="brand">
-                <div class="brand-mark"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L." width="400" height="358"></div>
+                <div class="brand-mark"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L." width="400" height="358" fetchpriority="high"></div>
                 <div>
                     <div class="brand-name">GASOMI INGENIEROS</div>
                     <div class="brand-sub">Tienda de Seguridad Industrial · EPP</div>
@@ -117,8 +117,9 @@
                     <div class="cat-toolbar">
                         <button class="f-toggle" id="f-toggle">Filtros</button>
                         <span class="cat-count" id="cat-count"></span>
+                        <label class="orden-label" for="orden-sel">Ordenar:</label>
                         <select class="orden-sel" id="orden-sel">
-                            <option value="relevancia">Orden: relevancia</option>
+                            <option value="relevancia">Relevancia</option>
                             <option value="precio-asc">Precio: menor a mayor</option>
                             <option value="precio-desc">Precio: mayor a menor</option>
                             <option value="stock">Mayor stock</option>
@@ -244,10 +245,10 @@
 
     <div class="toast" id="toast"></div>
 
-    <script src="productos.js" defer></script>
-    <script src="app.js" defer></script>
+    <script src="productos.min.js" defer></script>
+    <script src="app.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>
-    <script src="live.js" defer></script>
-    <script src="cuenta.js" defer></script>
+    <script src="live.min.js" defer></script>
+    <script src="cuenta.min.js" defer></script>
 </body>
 </html>
