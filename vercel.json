@@ -90,7 +90,7 @@
   ],
   "rewrites": [
     {
-      "source": "/tienda/p/:id*",
+      "source": "/tienda/p/(.*)",
       "destination": "/tienda/ficha.html"
     }
   ]
