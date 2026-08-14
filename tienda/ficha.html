@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protección de Manos en Cajamarca — Gasomi</title>
-    <meta name="description" content="Guantes para todo riesgo: manipulación general, anticorte, nitrilo, soldadura y trabajos eléctricos hasta 1000V. Precios en soles y entrega en obra en…">
-    <link rel="canonical" href="https://gasomi-web.vercel.app/tienda/c/proteccion-manos/">
-    <meta property="og:title" content="Protección de Manos en Cajamarca — Gasomi">
-    <meta property="og:description" content="Guantes para todo riesgo: manipulación general, anticorte, nitrilo, soldadura y trabajos eléctricos hasta 1000V. Precios en soles y entrega en obra en…">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="es_PE">
-    <meta property="og:url" content="https://gasomi-web.vercel.app/tienda/c/proteccion-manos/">
-    <meta property="og:image" content="https://gasomi-web.vercel.app/og-gasomi.jpg">
-    <meta name="twitter:card" content="summary_large_image">
+    <title>Producto — Tienda EPP Gasomi</title>
+    <meta name="description" content="Ficha de producto de la Tienda EPP de Gasomi Ingenieros: precios en soles, precio por mayor, stock en vivo y entrega en obra en Cajamarca.">
     <link rel="icon" type="image/png" href="/tienda/logo-gasomi.png">
     <link rel="preload" as="image" href="/tienda/logo-gasomi.png" fetchpriority="high">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="/tienda/tienda.min.css?v=7">
-    <script type="application/ld+json">[{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Tienda EPP", "item": "https://gasomi-web.vercel.app/tienda/"}, {"@type": "ListItem", "position": 2, "name": "Protección de Manos", "item": "https://gasomi-web.vercel.app/tienda/c/proteccion-manos/"}]}]</script>
+    <script>
+        // La ficha dinámica sirve /tienda/p/<id>/ para productos creados desde el CRM
+        // (los 40 del catálogo base tienen página estática propia con SEO completo).
+        (function () {
+            var q = new URLSearchParams(location.search).get('id');
+            var partes = location.pathname.split('/').filter(Boolean);
+            var ultimo = partes[partes.length - 1];
+            window.__GASOMI_PID = q || (ultimo && ultimo !== 'ficha.html' ? decodeURIComponent(ultimo) : '');
+        })();
+    </script>
 </head>
 <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -44,36 +45,33 @@
             </div>
         </div>
     </nav>
-    <nav class="crumbs" aria-label="Ruta de navegación"><a href="/tienda/">Tienda EPP</a><span class="sep">›</span><span>Protección de Manos</span></nav>
-    <main id="contenido">
-        <div class="cat-intro">
-            <span class="sec-label">Categoría</span>
-            <h1>Protección de Manos</h1>
-            <p>Guantes para todo riesgo: manipulación general, anticorte, nitrilo, soldadura y trabajos eléctricos hasta 1000V.</p>
-        </div>
-        <section class="catalogo" id="catalogo" style="padding-top:26px">
-            <div class="wrap">
-                <div class="cat-layout">
-                    <aside class="filtros" id="filtros"></aside>
-                    <div class="cat-main">
-                        <div class="cat-toolbar">
-                            <button class="f-toggle" id="f-toggle">Filtros</button>
-                            <span class="cat-count" id="cat-count"></span>
-                            <label class="orden-label" for="orden-sel">Ordenar:</label>
-                            <select class="orden-sel" id="orden-sel">
-                                <option value="relevancia">Relevancia</option>
-                                <option value="precio-asc">Precio: menor a mayor</option>
-                                <option value="precio-desc">Precio: mayor a menor</option>
-                                <option value="stock">Mayor stock</option>
-                            </select>
-                        </div>
-                        <div class="grid" id="grid"></div>
-                        <div class="sin-result" id="sin-result" style="display:none">No encontramos productos con esos filtros. Escríbenos por WhatsApp y lo conseguimos.</div>
-                    </div>
+    <nav class="crumbs" aria-label="Ruta de navegación"><a href="/tienda/">Tienda EPP</a><span class="sep">›</span><span id="p-crumb">…</span></nav>
+    <main id="contenido" class="prod-page">
+        <div class="prod-grid">
+            <div class="p-visual" id="p-visual"><div class="ph-mono" style="font-size:6rem">·</div></div>
+            <div class="p-info">
+                <span class="card-marca" id="p-marca"></span>
+                <h1 id="p-nombre">…</h1>
+                <span class="norma" id="p-norma" style="display:none"></span>
+                <p class="p-desc" id="p-desc"></p>
+                <div class="p-precio-row">
+                    <span class="p-precio" id="p-precio">—</span>
+                    <span class="unidad" id="p-unidad"></span>
+                </div>
+                <div id="p-mayor"></div>
+                <span class="stock-line" id="p-stock"></span>
+                <div class="p-acciones">
+                    <div class="step"><button data-qty="-1" aria-label="Menos cantidad">−</button><span id="m-qty">1</span><button data-qty="1" aria-label="Más cantidad">+</button></div>
+                    <button class="add-btn" id="p-add" data-add-modal="" style="padding:13px 26px;font-size:0.92rem">Agregar al pedido</button>
+                    <a class="btn-ghost" style="color:var(--primary);border-color:var(--line);padding:12px 20px" href="https://wa.me/51958682246" target="_blank" rel="noopener">Consultar</a>
+                </div>
+                <div class="p-meta">
+                    <span><b>Categoría:</b> <span id="p-meta-cat">—</span></span>
+                    <span><b>Unidad de venta:</b> <span id="p-meta-unidad">—</span></span>
+                    <span><b>Entrega:</b> en obra en Cajamarca y alrededores, o recojo en Jr. Puyllucana N° 391, Baños del Inca</span>
                 </div>
             </div>
-        </section>
-        <noscript><ul><li><a href="/tienda/p/guantes-de-cuero-badana-par/">Guantes de Cuero Badana (par)</a></li><li><a href="/tienda/p/guantes-de-nylon-con-recubrimiento-de-nitrilo-pa/">Guantes de Nylon con Recubrimiento de Nitrilo (par)</a></li><li><a href="/tienda/p/guantes-anticorte-cut-5-con-palma-pu-par/">Guantes Anticorte CUT-5 con Palma PU (par)</a></li><li><a href="/tienda/p/guantes-de-nitrilo-descartables-caja-x100/">Guantes de Nitrilo Descartables (caja x100)</a></li><li><a href="/tienda/p/guantes-de-soldador-cana-larga-cuero-cromo-par/">Guantes de Soldador Caña Larga Cuero Cromo (par)</a></li><li><a href="/tienda/p/guantes-dielectricos-clase-0-hasta-1000v-par/">Guantes Dieléctricos Clase 0 hasta 1000V (par)</a></li></ul></noscript>
+        </div>
     </main>
     <footer class="footer">
         <div class="footer-base" style="border-top:none;margin-top:0">
@@ -120,7 +118,6 @@
         </div>
     </div>
     <div class="toast" id="toast"></div>
-    <script>window.__GASOMI_CAT = "proteccion-manos";</script>
     <script src="/tienda/productos.min.js?v=7" defer></script>
     <script src="/tienda/app.min.js?v=7" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>

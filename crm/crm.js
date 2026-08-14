@@ -61,6 +61,13 @@
     if (d.length === 9) d = '51' + d;
     return d;
   }
+  function thumbSrc(p) {
+    if (!p.imagen) return '';
+    return p.imagen.indexOf('http') === 0 ? p.imagen : '../tienda/' + p.imagen;
+  }
+  function slugify(t) {
+    return normTxt(t).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'producto';
+  }
   function precioAplicado(p, qty) {
     var pm = num(p.precio_mayor);
     return (pm > 0 && pm < num(p.precio) && qty >= p.mayor_desde) ? pm : num(p.precio);
@@ -300,7 +307,7 @@
       return true;
     }).slice(0, 12);
     $('v-resultados').innerHTML = vis.map(function (p) {
-      var thumb = p.imagen ? '<img src="../tienda/' + esc(p.imagen) + '" alt="" loading="lazy">' : '<div class="v-ph">' + esc(p.nombre.charAt(0)) + '</div>';
+      var thumb = p.imagen ? '<img src="' + esc(thumbSrc(p)) + '" alt="" loading="lazy">' : '<div class="v-ph">' + esc(p.nombre.charAt(0)) + '</div>';
       var chip = p.stock <= 0 ? '<span class="v-chip fuera">Agotado</span>' : (p.stock <= 5 ? '<span class="v-chip pocas">' + p.stock + '</span>' : '');
       return '<button class="v-card' + (p.stock <= 0 ? ' agotada' : '') + '" data-v-add="' + esc(p.id) + '"' + (p.stock <= 0 ? ' disabled' : '') + '>' +
         thumb + chip +
@@ -368,6 +375,7 @@
     }).select();
     if (r.error || !r.data.length) { toast('No se pudo registrar: ' + (r.error ? r.error.message : ''), true); return; }
     toast('Venta #' + r.data[0].id + ' registrada ✓ (' + fmt(total) + ')');
+    notaVenta(r.data[0]);
     state.venta = { cliente: state.venta.cliente, items: [], q: '' };
     $('v-buscar').value = '';
     await cargarTodo();
@@ -394,7 +402,7 @@
     });
     $('prod-tbody').innerHTML = vis.map(function (p) {
       var thumb = p.imagen
-        ? '<img class="prod-thumb" src="../tienda/' + esc(p.imagen) + '" onerror="this.style.display=\'none\'" alt="">'
+        ? '<img class="prod-thumb" src="' + esc(thumbSrc(p)) + '" onerror="this.style.display=\'none\'" alt="">'
         : '<div class="prod-thumb-ph">' + esc(p.nombre.charAt(0)) + '</div>';
       var margen = '';
       if (admin && state.costos[p.id] > 0) {
@@ -469,6 +477,7 @@
         [['pendiente', 'por cobrar'], ['parcial', 'pago parcial'], ['pagado', 'pagado']].map(function (e) { return '<option value="' + e[0] + '"' + (p.pago_estado === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('') +
         '</select>' +
         '<span class="pedido-total">' + fmt(p.total) + '</span>' +
+        '<button class="icon-btn" data-nota="' + p.id + '" title="Nota de venta (imprimir/PDF)">🧾</button>' +
         '</div>' +
         (p.nota ? '<div class="pedido-nota">' + esc(p.nota) + '</div>' : '') +
         (p.vendedor_email ? '<div class="pl-sub" style="margin-top:6px">Vendedor: ' + esc(p.vendedor_email) + '</div>' : '') +
@@ -567,7 +576,7 @@
   });
 
   document.addEventListener('click', async function (e) {
-    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
+    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],[data-nota],#prod-nuevo,#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
     if (!t) return;
     var d = t.dataset || {};
     if (d.cat) { state.cat = d.cat; renderChips(); renderProductos(); return; }
@@ -649,6 +658,11 @@
       if (rCT.data && rCT.data.length) { state.tareas.push(rCT.data[0]); renderMiDia(); toast('Tarea agregada ✓'); }
       return;
     }
+    if (d.nota) {
+      var pn = state.pedidos.find(function (x) { return x.id === parseInt(d.nota, 10); });
+      if (pn) notaVenta(pn);
+      return;
+    }
     if (d.cliVer) { abrirCliente(d.cliVer); return; }
     if (t.classList && t.classList.contains('cli-row') && !e.target.closest('button')) { abrirCliente(t.dataset.cli); return; }
     if (d.eqActivo) {
@@ -659,6 +673,7 @@
       renderEquipo();
       return;
     }
+    if (t.id === 'prod-nuevo') { abrirModal(null); return; }
     if (t.id === 'eq-add') {
       var em = $('eq-email').value.trim().toLowerCase();
       if (!em || em.indexOf('@') < 1) { toast('Correo inválido', true); return; }
@@ -722,6 +737,52 @@
     toast('Puntos de ' + (c.nombre || c.email) + ': ' + nuevos + ' pts');
   }
 
+  function notaVenta(p) {
+    var c = clienteDe(p.cliente_id);
+    var filas = (p.items || []).map(function (i) {
+      return '<tr><td>' + i.qty + '</td><td>' + esc(i.nombre) + (i.mayor ? ' <small>(por mayor)</small>' : '') + '</td>' +
+        '<td class="der">' + fmt(i.precio) + '</td><td class="der">' + fmt(i.subtotal) + '</td></tr>';
+    }).join('');
+    var base = num(p.total) / 1.18;
+    var igv = num(p.total) - base;
+    var deuda = deudaDe(p);
+    var html = '<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Nota de venta NV-' + String(p.id).padStart(6, '0') + '</title>' +
+      '<style>body{font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#1a2332;max-width:640px;margin:24px auto;padding:0 20px}' +
+      '.cab{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #000a1e;padding-bottom:14px;margin-bottom:14px}' +
+      'h1{font-size:16px;margin:0;color:#000a1e}.emp{font-size:11px;color:#5a6577;line-height:1.5}' +
+      '.doc{text-align:right}.doc b{display:block;font-size:14px;color:#000a1e;border:2px solid #000a1e;border-radius:8px;padding:6px 14px}' +
+      '.doc span{font-size:10px;color:#5a6577}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}' +
+      'th{background:#f1f4f6;text-align:left;padding:7px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#5a6577}' +
+      'td{padding:7px 8px;border-bottom:1px solid #eef2f5}.der{text-align:right}' +
+      '.tot{margin-left:auto;width:230px;font-size:12px}.tot div{display:flex;justify-content:space-between;padding:3px 0}' +
+      '.tot .g{font-size:15px;font-weight:800;color:#000a1e;border-top:2px solid #000a1e;padding-top:6px;margin-top:4px}' +
+      '.meta{font-size:11px;color:#5a6577;margin:8px 0}.deuda{color:#a34700;font-weight:700}' +
+      '.pie{margin-top:22px;border-top:1px dashed #cdd6de;padding-top:10px;font-size:9.5px;color:#8a94a3;text-align:center}' +
+      '@media print{.noprint{display:none}}' +
+      '.noprint{position:fixed;top:12px;right:12px}.noprint button{background:#00696b;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}</style></head><body>' +
+      '<div class="noprint"><button onclick="window.print()">Imprimir / PDF</button></div>' +
+      '<div class="cab"><div><h1>GASOMI INGENIEROS E.I.R.L.</h1>' +
+      '<div class="emp">RUC 20600097726<br>Jr. Puyllucana N° 391, Baños del Inca, Cajamarca<br>WhatsApp +51 958 682 246</div></div>' +
+      '<div class="doc"><b>NOTA DE VENTA<br>NV-' + String(p.id).padStart(6, '0') + '</b><span>' + fecha(p.created_at) + '</span></div></div>' +
+      '<div class="meta"><b>Cliente:</b> ' + esc(c ? ((c.nombre || c.email) + (c.empresa ? ' · ' + c.empresa : '')) : 'Venta de mostrador') +
+      (c && c.telefono ? ' · ' + esc(c.telefono) : '') + '<br>' +
+      '<b>Origen:</b> ' + (p.origen === 'mostrador' ? 'Mostrador' : 'Tienda online') +
+      (p.vendedor_email ? ' · <b>Vendedor:</b> ' + esc(p.vendedor_email) : '') + '</div>' +
+      '<table><thead><tr><th>Cant.</th><th>Producto</th><th class="der">P. unit.</th><th class="der">Importe</th></tr></thead><tbody>' + filas + '</tbody></table>' +
+      '<div class="tot"><div><span>Op. gravada</span><span>' + fmt(base) + '</span></div>' +
+      '<div><span>IGV (18%)</span><span>' + fmt(igv) + '</span></div>' +
+      '<div class="g"><span>TOTAL</span><span>' + fmt(p.total) + '</span></div>' +
+      '<div><span>Pago</span><span>' + esc(p.pago_estado) + (p.pago_metodo ? ' · ' + esc(p.pago_metodo) : '') + '</span></div>' +
+      (deuda > 0 ? '<div class="deuda"><span>Saldo pendiente</span><span>' + fmt(deuda) + '</span></div>' : '') +
+      (p.nota ? '<div><span>Nota</span><span>' + esc(p.nota) + '</span></div>' : '') + '</div>' +
+      '<div class="pie">Documento interno de control de ventas. No constituye comprobante de pago fiscal (SUNAT).<br>Precios incluyen IGV. ¡Gracias por su compra!</div>' +
+      '</body></html>';
+    var w = window.open('', '_blank');
+    if (!w) { toast('Permite ventanas emergentes para ver la nota', true); return; }
+    w.document.write(html);
+    w.document.close();
+  }
+
   async function refrescarHistorial() {
     if (!esAdmin()) return;
     var rh = await db.from('gasomi_precios_historial').select('*, gasomi_productos(nombre)').order('created_at', { ascending: false }).limit(200);
@@ -743,7 +804,35 @@
       el.style.color = 'var(--muted)';
     }
   }
+  function pintarFotoPreview(url) {
+    var pv = $('e-foto-preview');
+    if (!pv) return;
+    pv.innerHTML = url ? '<img src="' + esc(url.indexOf('http') === 0 ? url : '../tienda/' + url) + '" alt="">' : '<span>Sin foto</span>';
+  }
   function abrirModal(id) {
+    if (id == null) {
+      state.editId = null;
+      $('edit-title').textContent = 'Nuevo producto';
+      $('e-nombre').value = '';
+      $('e-marca').value = '';
+      $('e-categoria').innerHTML = state.categorias.map(function (c) {
+        return '<option value="' + esc(c.slug) + '">' + esc(c.nombre) + '</option>';
+      }).join('');
+      $('e-precio').value = '';
+      $('e-costo').value = '';
+      $('e-precio-mayor').value = '0';
+      $('e-mayor-desde').value = '12';
+      $('e-stock').value = '10';
+      $('e-unidad').value = 'unidad';
+      $('e-norma').value = '';
+      $('e-descripcion').value = '';
+      $('e-imagen').value = '';
+      $('e-activo').checked = true;
+      pintarFotoPreview('');
+      pintarMargen();
+      $('edit-bg').style.display = 'flex';
+      return;
+    }
     var p = prodDe(id);
     if (!p) return;
     state.editId = id;
@@ -763,6 +852,7 @@
     $('e-descripcion').value = p.descripcion;
     $('e-imagen').value = p.imagen;
     $('e-activo').checked = !!p.activo;
+    pintarFotoPreview(p.imagen);
     pintarMargen();
     $('edit-bg').style.display = 'flex';
   }
@@ -773,6 +863,7 @@
   $('edit-save').addEventListener('click', async function () {
     var val = parseFloat($('e-precio').value);
     if (isNaN(val) || val < 0) { toast('Precio inválido', true); return; }
+    var esNuevo = state.editId == null;
     var patch = {
       nombre: $('e-nombre').value.trim(),
       marca: $('e-marca').value.trim(),
@@ -787,11 +878,66 @@
       imagen: $('e-imagen').value.trim(),
       activo: $('e-activo').checked
     };
+    if (esNuevo) {
+      if (!patch.nombre) { toast('Ponle nombre al producto', true); return; }
+      var nid = slugify(patch.nombre);
+      while (prodDe(nid)) nid += '-2';
+      patch.id = nid;
+      patch.orden = state.productos.reduce(function (a, p) { return Math.max(a, p.orden || 0); }, 0) + 1;
+      var rN = await db.from('gasomi_productos').insert(patch).select();
+      if (rN.error || !rN.data.length) { toast('No se pudo crear: ' + (rN.error ? rN.error.message : ''), true); return; }
+      state.productos.push(rN.data[0]);
+      var costoN = parseFloat($('e-costo').value) || 0;
+      if (costoN > 0) { await db.from('gasomi_costos').upsert({ producto_id: nid, costo: costoN }); state.costos[nid] = costoN; }
+      toast(patch.activo ? '¡Producto creado y ya visible en la tienda! ✓' : 'Producto creado (oculto) ✓');
+      cerrarModal(); renderProductos(); renderMiDia(); pintarVenta();
+      return;
+    }
     if (await updateProducto(state.editId, patch, 'Producto actualizado ✓')) {
       var costo = parseFloat($('e-costo').value) || 0;
       await db.from('gasomi_costos').upsert({ producto_id: state.editId, costo: costo });
       state.costos[state.editId] = costo;
       cerrarModal(); renderProductos(); renderMiDia(); await refrescarHistorial();
+    }
+  });
+
+  // ---- Subida de foto (optimizada en el navegador) ----
+  $('e-foto').addEventListener('change', async function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var st = $('e-foto-status');
+    st.textContent = 'Optimizando foto…';
+    try {
+      var img = await new Promise(function (res, rej) {
+        var u = URL.createObjectURL(file);
+        var im = new Image();
+        im.onload = function () { res(im); };
+        im.onerror = rej;
+        im.src = u;
+      });
+      var MAX = 1000;
+      var esc2 = Math.min(1, MAX / Math.max(img.width, img.height));
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * esc2);
+      cv.height = Math.round(img.height * esc2);
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      var blob = await new Promise(function (res) { cv.toBlob(res, 'image/jpeg', 0.85); });
+      st.textContent = 'Subiendo (' + Math.round(blob.size / 1024) + ' KB)…';
+      var base = state.editId || slugify($('e-nombre').value || 'producto');
+      var path = 'productos/' + base + '-' + Date.now() + '.jpg';
+      var up = await db.storage.from('gasomi-fotos').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (up.error) { st.textContent = 'Error al subir: ' + up.error.message; toast('No se pudo subir la foto', true); return; }
+      var pub = db.storage.from('gasomi-fotos').getPublicUrl(path);
+      $('e-imagen').value = pub.data.publicUrl;
+      pintarFotoPreview(pub.data.publicUrl);
+      st.textContent = 'Foto lista ✓ — guarda los cambios para publicarla.';
+      toast('Foto subida ✓');
+    } catch (err) {
+      st.textContent = 'No se pudo procesar la imagen.';
+      toast('Error con la foto', true);
     }
   });
 

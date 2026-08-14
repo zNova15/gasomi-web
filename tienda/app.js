@@ -66,6 +66,10 @@
     return (tieneMayor(p) && qty >= p.mayor_desde) ? p.precio_mayor : precio(p);
   }
   function tintOf(p) { return TINTS[(catIdx[p.categoria] || 0) % 4]; }
+  function imgSrc(p) {
+    if (!p.imagen) return '';
+    return p.imagen.indexOf('http') === 0 ? p.imagen : '/tienda/' + p.imagen;
+  }
 
   /* ---------- Filtros ---------- */
   function baseFiltro(p, ignorar) {
@@ -131,7 +135,7 @@
   }
   function phHTML(p, extraCls) {
     var img = p.imagen
-      ? '<img class="ph-img" loading="lazy" src="' + esc(p.imagen) + '" alt="' + esc(p.nombre) + '" onerror="this.remove()">'
+      ? '<img class="ph-img" loading="lazy" src="' + esc(imgSrc(p)) + '" alt="' + esc(p.nombre) + '" onerror="this.remove()">'
       : '';
     return '<div class="ph ' + (extraCls || '') + '">' +
       '<div class="ph-glow"></div>' +
@@ -381,9 +385,33 @@
     var pid = window.__GASOMI_PID;
     if (!pid) return;
     var p = byId[pid];
-    if (!p) return;
-    var s0 = stockDe(p);
     var el = function (id) { return document.getElementById(id); };
+    if (!p) {
+      if (el('p-nombre') && el('p-nombre').textContent === '…') el('p-nombre').textContent = 'Producto no encontrado';
+      return;
+    }
+    var s0 = stockDe(p);
+    if (el('p-nombre')) {
+      el('p-nombre').textContent = p.nombre;
+      document.title = p.nombre + ' — Tienda EPP Gasomi';
+    }
+    if (el('p-marca')) el('p-marca').textContent = p.marca;
+    if (el('p-desc')) el('p-desc').textContent = p.descripcion;
+    if (el('p-norma')) {
+      el('p-norma').textContent = p.norma || '';
+      el('p-norma').style.display = p.norma ? 'inline-block' : 'none';
+    }
+    if (el('p-crumb')) el('p-crumb').textContent = p.nombre.length > 40 ? p.nombre.slice(0, 40) + '…' : p.nombre;
+    if (el('p-meta-cat')) {
+      var cat0 = data.categorias.filter(function (c) { return c.slug === p.categoria; })[0];
+      el('p-meta-cat').textContent = cat0 ? cat0.nombre : p.categoria;
+    }
+    if (el('p-meta-unidad')) el('p-meta-unidad').textContent = p.unidad;
+    if (el('p-unidad')) el('p-unidad').textContent = p.unidad;
+    if (el('p-visual') && p.imagen && !el('p-visual').querySelector('img')) {
+      el('p-visual').innerHTML = '<img src="' + esc(imgSrc(p)) + '" alt="' + esc(p.nombre) + '" fetchpriority="high">';
+    }
+    if (el('p-add')) el('p-add').setAttribute('data-add-modal', p.id);
     if (el('p-precio')) el('p-precio').textContent = fmt(precio(p));
     if (el('p-mayor')) {
       el('p-mayor').innerHTML = mayorLine(p);

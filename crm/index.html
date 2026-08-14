@@ -7,7 +7,7 @@
     <meta name="description" content="Panel de administración de la Tienda EPP de Gasomi Ingenieros: productos, precios, pedidos e historial.">
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="../logo-gasomi.png">
-    <link rel="stylesheet" href="crm.css?v=6">
+    <link rel="stylesheet" href="crm.css?v=7">
 </head>
 <body>
     <!-- ===== LOGIN ===== -->
@@ -143,7 +143,10 @@
             <section class="view" id="view-productos" style="display:none">
                 <header class="view-head">
                     <h2>Productos y precios</h2>
-                    <input type="text" class="buscador" id="prod-buscar" placeholder="Buscar producto o marca…">
+                    <div class="v-row" style="margin-top:0">
+                        <input type="text" class="buscador" id="prod-buscar" placeholder="Buscar producto o marca…">
+                        <button class="btn-primary btn-mini solo-admin" id="prod-nuevo">+ Nuevo producto</button>
+                    </div>
                 </header>
                 <div class="chips" id="prod-chips"></div>
                 <div class="tabla-wrap">
@@ -226,6 +229,15 @@
                 <div class="span2 margen-hint" id="e-margen"></div>
                 <label class="span2">Norma / certificación<input type="text" id="e-norma"></label>
                 <label class="span2">Descripción<textarea id="e-descripcion" rows="3"></textarea></label>
+                <div class="span2 foto-zona">
+                    <div class="foto-preview" id="e-foto-preview"><span>Sin foto</span></div>
+                    <div class="foto-controles">
+                        <label class="btn-ghost foto-btn">📷 Tomar o subir foto
+                            <input type="file" id="e-foto" accept="image/*" style="display:none">
+                        </label>
+                        <div class="pl-sub" id="e-foto-status">Se optimiza sola (máx. 1000px, JPG). También puedes pegar una URL abajo.</div>
+                    </div>
+                </div>
                 <label class="span2">Imagen (ruta o URL)<input type="text" id="e-imagen" placeholder="img/mi-producto.jpg o https://…"></label>
                 <label class="check"><input type="checkbox" id="e-activo"> Visible en la tienda</label>
             </div>
@@ -247,6 +259,6 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
-    <script src="crm.js?v=6"></script>
+    <script src="crm.js?v=7"></script>
 </body>
 </html>

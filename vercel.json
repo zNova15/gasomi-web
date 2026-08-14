@@ -87,5 +87,11 @@
       "destination": "/tienda/",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/tienda/p/:id*",
+      "destination": "/tienda/ficha.html"
+    }
   ]
 }
