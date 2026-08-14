@@ -75,5 +75,17 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/index.html",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/tienda/index.html",
+      "destination": "/tienda/",
+      "permanent": true
+    }
   ]
 }
