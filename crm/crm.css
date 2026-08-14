@@ -191,3 +191,62 @@ input:focus, select:focus, textarea:focus { outline: 2px solid rgba(0, 105, 107,
 .pts-badge { color: var(--primary); font-family: 'Manrope', sans-serif; }
 .pedido-cliente { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
 .pedido-nota { margin-top: 8px; font-size: 0.8rem; color: #8a6400; background: #fff8e8; border-radius: 8px; padding: 6px 12px; display: inline-block; }
+/* ---------- Fase ventas: login tabs, Mi día, venta rápida, cliente 360, equipo ---------- */
+.login-tab { flex: 1; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; padding: 9px; font-weight: 700; font-size: 0.82rem; cursor: pointer; color: var(--muted); font-family: 'Manrope', sans-serif; }
+.login-tab.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn-mini { width: auto; padding: 9px 16px; font-size: 0.84rem; }
+.btn-mini-ok { background: var(--ok); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.76rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.btn-mini-ok:hover { filter: brightness(1.08); }
+.btn-mini-wa { background: #1fa855; color: #fff; border-radius: 8px; padding: 6px 12px; font-size: 0.76rem; font-weight: 700; text-decoration: none; white-space: nowrap; }
+.md-acciones { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.txt-alerta { color: var(--accent-warm); }
+.tarea-vencida { color: var(--accent-warm); font-weight: 700; }
+.tarea-add { display: flex; gap: 8px; margin-bottom: 10px; }
+
+.venta-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.v-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+.v-row:first-child { margin-top: 0; }
+.v-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 14px; }
+.v-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px; cursor: pointer; text-align: center; transition: all 0.15s ease; }
+.v-card:hover { border-color: var(--secondary); transform: translateY(-2px); box-shadow: var(--shadow); }
+.v-card.agotada { opacity: 0.45; cursor: not-allowed; }
+.v-card img { width: 100%; height: 74px; object-fit: contain; }
+.v-ph { width: 100%; height: 74px; display: flex; align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1.6rem; color: rgba(0,10,30,0.25); background: repeating-linear-gradient(-45deg, #f4f7f9 0 8px, #eef2f5 8px 16px); border-radius: 8px; }
+.v-chip { position: absolute; top: 6px; right: 6px; font-size: 0.6rem; font-weight: 800; padding: 2px 7px; border-radius: 6px; }
+.v-chip.pocas { background: var(--accent-gold); color: var(--primary); }
+.v-chip.fuera { background: #3d4654; color: #fff; }
+.v-nombre { font-size: 0.72rem; font-weight: 600; color: var(--on-surface); line-height: 1.25; }
+.v-precio { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.82rem; color: var(--primary); }
+.ticket { position: sticky; top: 20px; }
+.ticket h3 { margin-bottom: 10px; }
+.t-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--surface); }
+.t-info { flex: 1; min-width: 0; }
+.t-nombre { font-weight: 600; font-size: 0.82rem; color: var(--primary); line-height: 1.25; }
+.t-meta { font-size: 0.74rem; color: var(--muted); }
+.v-hint { font-size: 0.7rem; color: #8a6400; background: #fff8e8; border-radius: 6px; padding: 2px 8px; display: inline-block; margin-top: 3px; }
+.ticket .step { display: flex; align-items: center; gap: 2px; background: var(--surface); border-radius: 8px; padding: 2px; }
+.ticket .step button { width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-weight: 700; }
+.ticket .step span { min-width: 22px; text-align: center; font-weight: 700; font-size: 0.82rem; }
+.ticket .d-sub { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.84rem; min-width: 64px; text-align: right; }
+.ticket .d-x { background: none; border: none; color: var(--muted); cursor: pointer; }
+.ticket-total { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0 10px; font-weight: 600; }
+.ticket-total b { font-family: 'Manrope', sans-serif; font-size: 1.5rem; color: var(--primary); }
+
+.tag-origen { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); background: var(--surface); border-radius: 5px; padding: 2px 8px; }
+.tag-origen.mostrador { color: #7c5e00; background: #fff3d6; }
+.pago-badge { font-size: 0.72rem; font-weight: 800; border-radius: 6px; padding: 3px 9px; }
+.pago-badge.ok { color: #17663a; background: #e3f6ea; }
+.pago-badge.deuda { color: #a34700; background: #fff0e3; }
+.wa-plantillas { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.wa-plantillas a { background: #e9f9ef; color: #17663a; border: 1px solid #bfe9cd; border-radius: 8px; padding: 5px 11px; font-size: 0.75rem; font-weight: 700; text-decoration: none; }
+.wa-plantillas a:hover { background: #d9f4e3; }
+
+.cli-row { cursor: pointer; }
+.cli-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.cli-acciones { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 14px; }
+.cli-sub { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 16px 0 8px; font-family: 'Inter', sans-serif; }
+.rol-badge { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--muted); background: var(--surface); border-radius: 6px; padding: 3px 9px; }
+.rol-badge.admin { color: #7c5e00; background: #fff3d6; }
+.equipo-form input, .equipo-form select { max-width: 240px; }
+
+@media (max-width: 1000px) { .venta-layout { grid-template-columns: 1fr; } .ticket { position: static; } }

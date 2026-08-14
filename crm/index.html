@@ -20,8 +20,12 @@
                     <div class="login-sub">CRM · Tienda EPP</div>
                 </div>
             </div>
-            <h1>Inicia sesión</h1>
-            <p class="login-hint">Acceso solo para administradores de la tienda.</p>
+            <div class="cuenta-tabs" style="display:flex;gap:8px;margin-bottom:16px">
+                <button class="login-tab on" id="tab-ingresar">Ingresar</button>
+                <button class="login-tab" id="tab-registro">Soy nuevo en el equipo</button>
+            </div>
+            <h1 id="login-titulo">Inicia sesión</h1>
+            <p class="login-hint" id="login-hint">Acceso solo para el equipo de Gasomi.</p>
             <label>Correo
                 <input type="email" id="login-email" autocomplete="username" placeholder="tu@correo.com">
             </label>
@@ -44,11 +48,13 @@
                 </div>
             </div>
             <nav class="side-nav">
-                <button class="side-link on" data-view="dashboard">Dashboard</button>
-                <button class="side-link" data-view="productos">Productos y precios</button>
+                <button class="side-link on" data-view="midia">Mi día</button>
+                <button class="side-link" data-view="venta">Venta rápida</button>
                 <button class="side-link" data-view="pedidos">Pedidos <span class="side-badge" id="badge-pedidos" style="display:none">0</span></button>
                 <button class="side-link" data-view="clientes">Clientes y puntos</button>
-                <button class="side-link" data-view="historial">Historial de precios</button>
+                <button class="side-link" data-view="productos">Productos y stock</button>
+                <button class="side-link solo-admin" data-view="historial">Historial de precios</button>
+                <button class="side-link solo-admin" data-view="equipo">Equipo</button>
             </nav>
             <div class="side-foot">
                 <a href="../tienda/" target="_blank" class="side-tienda">Ver tienda ↗</a>
@@ -58,18 +64,77 @@
         </aside>
 
         <main class="main">
-            <!-- Dashboard -->
-            <section class="view" id="view-dashboard">
-                <header class="view-head"><h2>Dashboard</h2><span class="view-sub" id="dash-fecha"></span></header>
+            <!-- Mi día -->
+            <section class="view" id="view-midia">
+                <header class="view-head"><h2 id="midia-saludo">Mi día</h2><span class="view-sub" id="dash-fecha"></span></header>
                 <div class="kpis" id="kpis"></div>
                 <div class="dash-cols">
                     <div class="panel">
-                        <h3>Últimos pedidos</h3>
-                        <div id="dash-pedidos" class="panel-list"></div>
+                        <h3>Pedidos por atender</h3>
+                        <div id="md-nuevos" class="panel-list"></div>
                     </div>
                     <div class="panel">
-                        <h3>Últimos cambios de precio</h3>
-                        <div id="dash-cambios" class="panel-list"></div>
+                        <h3>Por cobrar</h3>
+                        <div id="md-cobrar" class="panel-list"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Tareas y seguimientos</h3>
+                        <div class="tarea-add">
+                            <input type="text" id="tarea-texto" placeholder="Ej: llamar a constructora X por la cotización…">
+                            <button class="btn-primary btn-mini" id="tarea-btn">+</button>
+                        </div>
+                        <div id="md-tareas" class="panel-list"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Por agotarse</h3>
+                        <div id="md-stock" class="panel-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Venta rápida -->
+            <section class="view" id="view-venta" style="display:none">
+                <header class="view-head"><h2>Venta rápida</h2><span class="view-sub">Registra una venta de mostrador o arma un pedido por WhatsApp en segundos</span></header>
+                <div class="venta-layout">
+                    <div>
+                        <div class="panel venta-cliente">
+                            <div class="v-row">
+                                <select id="v-cliente" class="pedido-estado" style="flex:1">
+                                    <option value="">— Venta sin cuenta de cliente —</option>
+                                </select>
+                                <button class="btn-ghost btn-mini" id="v-repetir" title="Cargar el último pedido de este cliente" style="display:none">Repetir último pedido</button>
+                            </div>
+                        </div>
+                        <div class="panel" style="margin-top:14px">
+                            <input type="text" id="v-buscar" placeholder="Busca producto: casco, guantes, arnés…" class="buscador" style="max-width:none">
+                            <div class="v-grid" id="v-resultados"></div>
+                        </div>
+                    </div>
+                    <div class="panel ticket">
+                        <h3>Ticket</h3>
+                        <div id="v-items"></div>
+                        <div class="ticket-total">
+                            <span>Total</span>
+                            <b id="v-total">S/ 0.00</b>
+                        </div>
+                        <div class="v-row">
+                            <select id="v-pago" class="pedido-estado" style="flex:1">
+                                <option value="pagado">Pagado</option>
+                                <option value="parcial">Pago parcial</option>
+                                <option value="pendiente">Por cobrar (crédito)</option>
+                            </select>
+                            <select id="v-metodo" class="pedido-estado" style="flex:1">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="yape">Yape</option>
+                                <option value="plin">Plin</option>
+                                <option value="transferencia">Transferencia</option>
+                            </select>
+                        </div>
+                        <div class="v-row" id="v-parcial-row" style="display:none">
+                            <input type="number" id="v-monto" min="0" step="0.10" placeholder="Monto recibido (S/)">
+                        </div>
+                        <button class="btn-primary btn-block" id="v-registrar" style="margin-top:12px">Registrar venta</button>
+                        <div class="pl-sub" style="margin-top:8px">La venta descuenta stock al instante y suma puntos si el cliente tiene cuenta.</div>
                     </div>
                 </div>
             </section>
@@ -93,7 +158,8 @@
 
             <!-- Pedidos -->
             <section class="view" id="view-pedidos" style="display:none">
-                <header class="view-head"><h2>Pedidos</h2><span class="view-sub">Los pedidos llegan cuando un cliente envía su carrito por WhatsApp</span></header>
+                <header class="view-head"><h2>Pedidos</h2><span class="view-sub">De la tienda online y del mostrador · gestión de estado y cobro</span></header>
+                <div class="chips" id="ped-chips"></div>
                 <div id="pedidos-list"></div>
             </section>
 
@@ -104,6 +170,28 @@
                     <table class="tabla">
                         <thead><tr><th>Cliente</th><th>Contacto</th><th>Empresa</th><th>Puntos</th><th>Registro</th><th></th></tr></thead>
                         <tbody id="cli-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Equipo -->
+            <section class="view" id="view-equipo" style="display:none">
+                <header class="view-head"><h2>Equipo</h2><span class="view-sub">Agrega el correo del vendedor; luego él crea su cuenta desde la pantalla de ingreso con "Soy nuevo en el equipo"</span></header>
+                <div class="panel" style="margin-bottom:16px">
+                    <div class="v-row equipo-form">
+                        <input type="email" id="eq-email" placeholder="correo@delvendedor.com">
+                        <input type="text" id="eq-nombre" placeholder="Nombre">
+                        <select id="eq-rol" class="pedido-estado">
+                            <option value="vendedor">Vendedor</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                        <button class="btn-primary btn-mini" id="eq-add">Agregar</button>
+                    </div>
+                </div>
+                <div class="tabla-wrap">
+                    <table class="tabla">
+                        <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Activo</th><th>Alta</th></tr></thead>
+                        <tbody id="eq-tbody"></tbody>
                     </table>
                 </div>
             </section>
@@ -145,6 +233,14 @@
                 <button class="btn-ghost" id="edit-cancel">Cancelar</button>
                 <button class="btn-primary" id="edit-save">Guardar cambios</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Cliente 360 -->
+    <div class="modal-bg" id="cli-bg" style="display:none">
+        <div class="edit-modal">
+            <div class="edit-head"><h3 id="cli-titulo">Cliente</h3><button class="x-btn" id="cli-close">✕</button></div>
+            <div id="cli-body" style="padding:20px 24px 24px"></div>
         </div>
     </div>
 

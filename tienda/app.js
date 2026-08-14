@@ -29,7 +29,7 @@
   rebuild();
 
   var state = {
-    cat: 'todos',
+    cat: (typeof window.__GASOMI_CAT === 'string' ? window.__GASOMI_CAT : 'todos'),
     q: '',
     marcas: {},          // {marca: true}
     pmin: null,
@@ -148,6 +148,7 @@
   }
 
   function renderGrid() {
+    if (!document.getElementById('grid')) return;
     var vis = visibles();
     document.getElementById('cat-count').textContent = vis.length + ' de ' + data.productos.length + ' productos';
     document.getElementById('sin-result').style.display = vis.length ? 'none' : 'block';
@@ -183,6 +184,7 @@
   }
 
   function renderCart() {
+    if (!document.getElementById('d-items')) return;
     var ids = cartIds();
     var totalBruto = 0;
     var count = 0;
@@ -274,8 +276,10 @@
     document.getElementById('drawer').className = open ? 'drawer on' : 'drawer';
   }
   function setFiltros(open) {
+    var fEl = document.getElementById('filtros');
+    if (!fEl) return;
     state.filtrosOpen = open;
-    document.getElementById('filtros').classList.toggle('open', open);
+    fEl.classList.toggle('open', open);
     if (window.innerWidth <= 960) document.getElementById('overlay').className = open ? 'overlay on' : 'overlay';
   }
 
@@ -329,7 +333,7 @@
       return;
     }
     if (t.dataset.qty) {
-      var mp = byId[state.modal];
+      var mp = byId[state.modal] || (window.__GASOMI_PID ? byId[window.__GASOMI_PID] : null);
       var nq2 = Math.max(1, state.qty + parseInt(t.dataset.qty, 10));
       if (mp) nq2 = Math.min(nq2, Math.max(1, stockDe(mp)));
       state.qty = nq2;
@@ -337,7 +341,7 @@
       if (mq) mq.textContent = state.qty;
       return;
     }
-    if (t.dataset.open) { state.modal = t.dataset.open; state.qty = 1; renderModal(); return; }
+    if (t.dataset.open) { location.href = '/tienda/p/' + t.dataset.open + '/'; return; }
     if (t.dataset.inc) { mod(t.dataset.inc, 1); return; }
     if (t.dataset.dec) { mod(t.dataset.dec, -1); return; }
     if (t.dataset.del) { mod(t.dataset.del, -(state.cart[t.dataset.del] || 0)); return; }
@@ -361,8 +365,10 @@
     if (e.target.id === 'f-pmax') { state.pmax = e.target.value === '' ? null : parseFloat(e.target.value); renderGrid(); }
   });
 
-  document.getElementById('overlay').addEventListener('click', function () { setDrawer(false); setFiltros(false); });
-  document.getElementById('buscar').addEventListener('input', function (e) {
+  var ovEl = document.getElementById('overlay');
+  if (ovEl) ovEl.addEventListener('click', function () { setDrawer(false); setFiltros(false); });
+  var buscarEl = document.getElementById('buscar');
+  if (buscarEl) buscarEl.addEventListener('input', function (e) {
     state.q = e.target.value;
     renderFiltros();
     renderGrid();
@@ -371,9 +377,34 @@
     if (e.key === 'Escape') { state.modal = null; renderModal(); setDrawer(false); setFiltros(false); }
   });
 
+  function renderProducto() {
+    var pid = window.__GASOMI_PID;
+    if (!pid) return;
+    var p = byId[pid];
+    if (!p) return;
+    var s0 = stockDe(p);
+    var el = function (id) { return document.getElementById(id); };
+    if (el('p-precio')) el('p-precio').textContent = fmt(precio(p));
+    if (el('p-mayor')) {
+      el('p-mayor').innerHTML = mayorLine(p);
+      el('p-mayor').style.display = tieneMayor(p) ? 'block' : 'none';
+    }
+    if (el('p-stock')) {
+      el('p-stock').className = 'stock-line' + (s0 > 0 ? ' ok' : '');
+      el('p-stock').textContent = s0 > 0 ? ('Stock disponible: ' + s0) : 'Sin stock por ahora — consúltanos por WhatsApp';
+    }
+    if (el('p-add')) {
+      el('p-add').disabled = s0 <= 0;
+      el('p-add').textContent = s0 <= 0 ? 'Agotado' : 'Agregar al pedido';
+    }
+    if (state.qty > Math.max(1, s0)) state.qty = Math.max(1, s0);
+    if (el('m-qty')) el('m-qty').textContent = state.qty;
+  }
+
   renderFiltros();
   renderGrid();
   renderCart();
+  renderProducto();
 
   // Hook para live.js: catálogo en vivo desde Supabase (precios/stock del CRM) y re-render total
   window.__gasomiApply = function (cats, prods) {
@@ -381,7 +412,7 @@
     if (prods && prods.length) data.productos = prods;
     rebuild();
     if (state.modal && !byId[state.modal]) state.modal = null;
-    renderFiltros(); renderGrid(); renderCart(); renderModal();
+    renderFiltros(); renderGrid(); renderCart(); renderModal(); renderProducto();
   };
   // Hook para cuenta.js: re-render del carrito al activar canje o cambiar puntos
   window.__gasomiRefrescarCarrito = renderCart;

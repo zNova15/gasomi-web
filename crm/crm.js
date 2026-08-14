@@ -1,5 +1,6 @@
-/* CRM Tienda EPP — Gasomi Ingenieros. Supabase (tablas gasomi_*, RLS por allowlist de admins).
-   Inventario automático: los pedidos descuentan stock, anular lo devuelve, atender otorga puntos. */
+/* CRM de Ventas — Tienda EPP Gasomi Ingenieros.
+   Roles reales (admin/vendedor por RLS), venta rápida de mostrador, cuentas por cobrar,
+   tareas de seguimiento, WhatsApp con plantillas y catálogo con stock en vivo. */
 (function () {
   'use strict';
 
@@ -7,7 +8,14 @@
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZ3hzZWpqYmhreW1hemdhbHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDAwMDAsImV4cCI6MjA5ODk3NjAwMH0.X3yg0OewAb1QoBk4HdeALWR33cv9WVJZIbzNKzUWCT4';
   var db = window.supabase.createClient(SB_URL, SB_KEY);
 
-  var state = { categorias: [], productos: [], pedidos: [], historial: [], clientes: [], cat: 'todos', q: '', editId: null };
+  var state = {
+    usuario: null, rol: 'vendedor',
+    categorias: [], productos: [], pedidos: [], historial: [], clientes: [], tareas: [], costos: {},
+    cat: 'todos', q: '', editId: null,
+    pedFiltro: 'todos',
+    venta: { cliente: '', items: [], q: '' },
+    loginModo: 'ingresar'
+  };
   var toastTimer = null;
   var rtOn = false;
 
@@ -22,6 +30,9 @@
   function fecha(iso) {
     return new Date(iso).toLocaleString('es-PE', { timeZone: 'America/Lima', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
   }
+  function hoyLima() {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+  }
   function toast(msg, err) {
     var el = $('toast');
     el.textContent = msg;
@@ -29,39 +40,98 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { el.className = 'toast'; }, 2600);
   }
+  function esAdmin() { return state.rol === 'admin'; }
+  function normTxt(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  function coincide(texto, q) {
+    var hay = normTxt(texto);
+    return normTxt(q).split(/\s+/).every(function (tok) { return !tok || hay.indexOf(tok) > -1; });
+  }
+  function prodDe(id) { return state.productos.find(function (p) { return p.id === id; }); }
+  function clienteDe(uid) { return state.clientes.find(function (c) { return c.user_id === uid; }); }
+  function nombreCliente(uid) {
+    var c = clienteDe(uid);
+    return c ? (c.nombre || c.empresa || c.email) : 'cliente';
+  }
+  function telWa(c) {
+    if (!c || !c.telefono) return null;
+    var d = c.telefono.replace(/\D/g, '');
+    if (!d) return null;
+    if (d.length === 9) d = '51' + d;
+    return d;
+  }
+  function precioAplicado(p, qty) {
+    var pm = num(p.precio_mayor);
+    return (pm > 0 && pm < num(p.precio) && qty >= p.mayor_desde) ? pm : num(p.precio);
+  }
+  function deudaDe(p) {
+    return Math.max(0, num(p.total) - num(p.monto_pagado));
+  }
 
-  /* ---------- Auth ---------- */
+  /* ================= Auth ================= */
   function showLogin(msg) {
     $('login-view').style.display = 'flex';
     $('app-view').style.display = 'none';
     if (msg) $('login-error').textContent = msg;
   }
+  function pintarLoginModo() {
+    var ing = state.loginModo === 'ingresar';
+    $('tab-ingresar').classList.toggle('on', ing);
+    $('tab-registro').classList.toggle('on', !ing);
+    $('login-titulo').textContent = ing ? 'Inicia sesión' : 'Crea tu cuenta del equipo';
+    $('login-hint').textContent = ing
+      ? 'Acceso solo para el equipo de Gasomi.'
+      : 'Usa el correo que el administrador registró en Equipo. Te llegará un email para confirmar.';
+    $('login-btn').textContent = ing ? 'Entrar' : 'Crear cuenta';
+  }
+  $('tab-ingresar').addEventListener('click', function () { state.loginModo = 'ingresar'; pintarLoginModo(); });
+  $('tab-registro').addEventListener('click', function () { state.loginModo = 'registro'; pintarLoginModo(); });
+
   async function boot() {
     var s = await db.auth.getSession();
     if (s.data.session) { await enter(s.data.session); } else { showLogin(''); }
   }
   async function enter(session) {
-    var chk = await db.from('gasomi_crm_admins').select('email').limit(1);
-    if (chk.error || !chk.data || !chk.data.length) {
+    var r = await db.from('gasomi_crm_usuarios').select('*').eq('email', session.user.email);
+    var u = r.data && r.data[0];
+    if (!u || !u.activo) {
       await db.auth.signOut();
-      showLogin('Esta cuenta no tiene acceso al CRM de Gasomi.');
+      showLogin(u ? 'Tu acceso está desactivado. Habla con el administrador.' : 'Esta cuenta no es parte del equipo de Gasomi.');
       return;
     }
+    state.usuario = u;
+    state.rol = u.rol;
     $('login-view').style.display = 'none';
     $('app-view').style.display = 'flex';
-    $('side-user').textContent = session.user.email;
+    $('side-user').textContent = (u.nombre ? u.nombre + ' · ' : '') + u.email + ' · ' + (esAdmin() ? 'Administrador' : 'Vendedor');
+    if (!esAdmin()) document.querySelectorAll('.solo-admin').forEach(function (b) { b.style.display = 'none'; });
     await cargarTodo();
     render();
     activarRealtime();
   }
-  $('login-btn').addEventListener('click', doLogin);
-  $('login-pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
-  async function doLogin() {
+  $('login-btn').addEventListener('click', doLoginRegistro);
+  $('login-pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLoginRegistro(); });
+  async function doLoginRegistro() {
     $('login-error').textContent = '';
+    var email = $('login-email').value.trim();
+    var pass = $('login-pass').value;
+    if (state.loginModo === 'registro') {
+      if (pass.length < 6) { $('login-error').textContent = 'La contraseña necesita 6+ caracteres.'; return; }
+      var rr = await db.auth.signUp({ email: email, password: pass });
+      if (rr.error) {
+        $('login-error').textContent = rr.error.message.indexOf('already') > -1 ? 'Este correo ya tiene cuenta: usa "Ingresar".' : 'No se pudo crear: ' + rr.error.message;
+        return;
+      }
+      $('login-error').textContent = 'Cuenta creada. Revisa tu correo, confírmalo y luego ingresa aquí.';
+      state.loginModo = 'ingresar';
+      pintarLoginModo();
+      return;
+    }
     $('login-btn').textContent = 'Entrando…';
-    var r = await db.auth.signInWithPassword({ email: $('login-email').value.trim(), password: $('login-pass').value });
+    var r = await db.auth.signInWithPassword({ email: email, password: pass });
     $('login-btn').textContent = 'Entrar';
-    if (r.error) { $('login-error').textContent = 'Credenciales incorrectas o cuenta inexistente.'; return; }
+    if (r.error) { $('login-error').textContent = 'Credenciales incorrectas o cuenta sin confirmar.'; return; }
     await enter(r.data.session);
   }
   $('logout-btn').addEventListener('click', async function () {
@@ -69,18 +139,25 @@
     location.reload();
   });
 
-  /* ---------- Data + realtime ---------- */
+  /* ================= Data ================= */
   async function cargarTodo() {
     var rc = await db.from('gasomi_categorias').select('*').order('orden');
     var rp = await db.from('gasomi_productos').select('*').order('orden');
-    var rped = await db.from('gasomi_pedidos').select('*').order('created_at', { ascending: false }).limit(100);
-    var rh = await db.from('gasomi_precios_historial').select('*, gasomi_productos(nombre)').order('created_at', { ascending: false }).limit(200);
+    var rped = await db.from('gasomi_pedidos').select('*').order('created_at', { ascending: false }).limit(200);
     var rcli = await db.from('gasomi_clientes').select('*').order('created_at', { ascending: false });
+    var rt = await db.from('gasomi_tareas').select('*').eq('hecho', false).order('fecha').limit(100);
     state.categorias = rc.data || [];
     state.productos = rp.data || [];
     state.pedidos = rped.data || [];
-    state.historial = rh.data || [];
     state.clientes = rcli.data || [];
+    state.tareas = rt.data || [];
+    if (esAdmin()) {
+      var rh = await db.from('gasomi_precios_historial').select('*, gasomi_productos(nombre)').order('created_at', { ascending: false }).limit(200);
+      state.historial = rh.data || [];
+      var rco = await db.from('gasomi_costos').select('*');
+      state.costos = {};
+      (rco.data || []).forEach(function (c) { state.costos[c.producto_id] = num(c.costo); });
+    }
   }
 
   var rtTimer = null;
@@ -109,64 +186,210 @@
       .subscribe();
   }
 
-  /* ---------- Navegación ---------- */
+  /* ================= Navegación ================= */
   document.querySelectorAll('.side-link').forEach(function (b) {
     b.addEventListener('click', function () {
       document.querySelectorAll('.side-link').forEach(function (x) { x.classList.remove('on'); });
       b.classList.add('on');
       document.querySelectorAll('.view').forEach(function (v) { v.style.display = 'none'; });
       $('view-' + b.dataset.view).style.display = 'block';
+      if (b.dataset.view === 'venta') pintarVenta();
     });
   });
+  function irA(view) {
+    var btn = document.querySelector('.side-link[data-view="' + view + '"]');
+    if (btn) btn.click();
+  }
 
-  /* ---------- Render ---------- */
-  function render() { renderDash(); renderChips(); renderProductos(); renderPedidos(); renderClientes(); renderHistorial(); }
+  /* ================= Render ================= */
+  function render() { renderMiDia(); renderChips(); renderProductos(); renderPedChips(); renderPedidos(); renderClientes(); renderHistorial(); renderEquipo(); pintarVenta(); }
 
-  function renderDash() {
+  function ventasDe(dia) {
+    return state.pedidos.filter(function (p) {
+      return p.estado === 'atendido' && new Date(p.created_at).toLocaleDateString('en-CA', { timeZone: 'America/Lima' }) === dia;
+    });
+  }
+
+  function renderMiDia() {
+    $('midia-saludo').textContent = 'Hola, ' + ((state.usuario && state.usuario.nombre) ? state.usuario.nombre.split(' ')[0] : 'equipo');
     $('dash-fecha').textContent = new Date().toLocaleDateString('es-PE', { timeZone: 'America/Lima', weekday: 'long', day: 'numeric', month: 'long' });
-    var activos = state.productos.filter(function (p) { return p.activo; }).length;
-    var nuevos = state.pedidos.filter(function (p) { return p.estado === 'nuevo'; }).length;
-    var agotados = state.productos.filter(function (p) { return p.stock <= 0; }).length;
-    var bajos = state.productos.filter(function (p) { return p.stock > 0 && p.stock <= 5; }).length;
+    var hoy = hoyLima();
+    var vHoy = ventasDe(hoy);
+    var totalHoy = vHoy.reduce(function (a, p) { return a + num(p.total); }, 0);
+    var nuevos = state.pedidos.filter(function (p) { return p.estado === 'nuevo'; });
+    var porCobrar = state.pedidos.filter(function (p) { return p.estado === 'atendido' && p.pago_estado !== 'pagado' && deudaDe(p) > 0; });
+    var deuda = porCobrar.reduce(function (a, p) { return a + deudaDe(p); }, 0);
+    var bajos = state.productos.filter(function (p) { return p.activo && p.stock <= 5; });
+    var mes = hoy.slice(0, 7);
+    var vMes = state.pedidos.filter(function (p) {
+      return p.estado === 'atendido' && new Date(p.created_at).toLocaleDateString('en-CA', { timeZone: 'America/Lima' }).slice(0, 7) === mes;
+    }).reduce(function (a, p) { return a + num(p.total); }, 0);
+
     $('kpis').innerHTML =
-      '<div class="kpi"><div class="kpi-n">' + activos + '/' + state.productos.length + '</div><div class="kpi-l">Productos visibles</div></div>' +
-      '<div class="kpi"><div class="kpi-n">' + nuevos + '</div><div class="kpi-l">Pedidos nuevos</div></div>' +
-      '<div class="kpi"><div class="kpi-n' + (agotados ? ' kpi-alerta' : '') + '">' + agotados + '</div><div class="kpi-l">Agotados</div></div>' +
-      '<div class="kpi"><div class="kpi-n' + (bajos ? ' kpi-aviso' : '') + '">' + bajos + '</div><div class="kpi-l">Stock bajo (≤5)</div></div>' +
-      '<div class="kpi"><div class="kpi-n">' + state.clientes.length + '</div><div class="kpi-l">Clientes registrados</div></div>';
+      '<div class="kpi"><div class="kpi-n">' + fmt(totalHoy) + '</div><div class="kpi-l">Vendido hoy (' + vHoy.length + ' ventas)</div></div>' +
+      '<div class="kpi"><div class="kpi-n' + (nuevos.length ? ' kpi-aviso' : '') + '">' + nuevos.length + '</div><div class="kpi-l">Pedidos por atender</div></div>' +
+      '<div class="kpi"><div class="kpi-n' + (deuda > 0 ? ' kpi-alerta' : '') + '">' + fmt(deuda) + '</div><div class="kpi-l">Por cobrar (' + porCobrar.length + ')</div></div>' +
+      (esAdmin() ? '<div class="kpi"><div class="kpi-n">' + fmt(vMes) + '</div><div class="kpi-l">Vendido este mes</div></div>' : '') +
+      '<div class="kpi"><div class="kpi-n' + (bajos.length ? ' kpi-aviso' : '') + '">' + bajos.length + '</div><div class="kpi-l">Por agotarse (≤5)</div></div>';
+
     var badge = $('badge-pedidos');
-    badge.style.display = nuevos ? 'inline-flex' : 'none';
-    badge.textContent = nuevos;
-    $('dash-pedidos').innerHTML = state.pedidos.slice(0, 5).map(function (p) {
-      var n = (p.items || []).reduce(function (a, i) { return a + (i.qty || 0); }, 0);
-      return '<div class="pl-row"><div class="pl-main">Pedido #' + p.id + (p.estado === 'nuevo' ? ' · <span class="estado-nuevo">nuevo</span>' : ' · ' + esc(p.estado)) +
-        '<div class="pl-sub">' + fecha(p.created_at) + ' · ' + n + ' ítems' + (p.cliente_id ? ' · ' + esc(nombreCliente(p.cliente_id)) : '') + '</div></div><div class="pl-val">' + fmt(p.total) + '</div></div>';
-    }).join('') || '<div class="pl-empty">Aún no hay pedidos.</div>';
-    $('dash-cambios').innerHTML = state.historial.slice(0, 5).map(function (h) {
-      var nom = h.gasomi_productos ? h.gasomi_productos.nombre : h.producto_id;
-      return '<div class="pl-row"><div class="pl-main">' + esc(nom) + '<div class="pl-sub">' + fecha(h.created_at) + (h.tipo === 'mayor' ? ' · por mayor' : '') + '</div></div>' +
-        '<div class="pl-val">' + fmt(h.precio_anterior) + ' → ' + fmt(h.precio_nuevo) + '</div></div>';
-    }).join('') || '<div class="pl-empty">Sin cambios de precio todavía.</div>';
+    badge.style.display = nuevos.length ? 'inline-flex' : 'none';
+    badge.textContent = nuevos.length;
+
+    $('md-nuevos').innerHTML = nuevos.slice(0, 6).map(function (p) {
+      return '<div class="pl-row"><div class="pl-main">#' + p.id + ' · ' + (p.cliente_id ? esc(nombreCliente(p.cliente_id)) : 'sin cuenta') +
+        '<div class="pl-sub">' + fecha(p.created_at) + ' · ' + (p.items || []).length + ' líneas</div></div>' +
+        '<div class="md-acciones"><span class="pl-val">' + fmt(p.total) + '</span>' +
+        '<button class="btn-mini-ok" data-atender="' + p.id + '">Atender ✓</button></div></div>';
+    }).join('') || '<div class="pl-empty">Nada pendiente. Todo atendido ✓</div>';
+
+    $('md-cobrar').innerHTML = porCobrar.slice(0, 6).map(function (p) {
+      var c = clienteDe(p.cliente_id);
+      var wa = telWa(c);
+      var link = wa ? '<a class="btn-mini-wa" target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' +
+        encodeURIComponent('Hola ' + (c.nombre || '') + '! Te recordamos el saldo pendiente de ' + fmt(deudaDe(p)) + ' del pedido #' + p.id + ' en Gasomi. Puedes pagar por Yape o Plin al 958 682 246. ¡Gracias!') + '">Recordar 💬</a>' : '';
+      return '<div class="pl-row"><div class="pl-main">#' + p.id + ' · ' + (p.cliente_id ? esc(nombreCliente(p.cliente_id)) : 'sin cuenta') +
+        '<div class="pl-sub">' + esc(p.pago_estado) + (p.pago_metodo ? ' · ' + esc(p.pago_metodo) : '') + '</div></div>' +
+        '<div class="md-acciones"><span class="pl-val">' + fmt(deudaDe(p)) + '</span>' + link + '</div></div>';
+    }).join('') || '<div class="pl-empty">No hay deudas pendientes ✓</div>';
+
+    var hoyD = hoyLima();
+    $('md-tareas').innerHTML = state.tareas.slice(0, 8).map(function (t) {
+      var vencida = t.fecha < hoyD;
+      return '<div class="pl-row"><div class="pl-main">' + esc(t.texto) +
+        '<div class="pl-sub' + (vencida ? ' tarea-vencida' : '') + '">' + (t.cliente_id ? esc(nombreCliente(t.cliente_id)) + ' · ' : '') + t.fecha + (vencida ? ' · vencida' : '') + '</div></div>' +
+        '<button class="btn-mini-ok" data-tarea-ok="' + t.id + '">Hecho ✓</button></div>';
+    }).join('') || '<div class="pl-empty">Sin tareas pendientes. Agrega una arriba ↑</div>';
+
+    $('md-stock').innerHTML = bajos.slice(0, 8).map(function (p) {
+      return '<div class="pl-row"><div class="pl-main">' + esc(p.nombre) + '<div class="pl-sub">' + esc(p.marca) + '</div></div>' +
+        '<span class="pl-val' + (p.stock <= 0 ? ' txt-alerta' : '') + '">' + p.stock + ' und.</span></div>';
+    }).join('') || '<div class="pl-empty">Stock saludable en todo el catálogo ✓</div>';
   }
 
-  function nombreCliente(uid) {
-    var c = state.clientes.find(function (x) { return x.user_id === uid; });
-    if (!c) return 'cliente';
-    return c.nombre || c.empresa || c.email;
+  /* ================= Venta rápida ================= */
+  function pintarVenta() {
+    if (!$('v-cliente')) return;
+    var sel = $('v-cliente');
+    var actual = state.venta.cliente;
+    sel.innerHTML = '<option value="">— Venta sin cuenta de cliente —</option>' + state.clientes.map(function (c) {
+      return '<option value="' + esc(c.user_id) + '"' + (c.user_id === actual ? ' selected' : '') + '>' + esc((c.nombre || c.email) + (c.empresa ? ' · ' + c.empresa : '')) + '</option>';
+    }).join('');
+    $('v-repetir').style.display = actual && ultimoPedidoDe(actual) ? 'inline-flex' : 'none';
+    pintarResultados();
+    pintarTicket();
+  }
+  function ultimoPedidoDe(uid) {
+    return state.pedidos.find(function (p) { return p.cliente_id === uid && p.estado !== 'anulado'; });
+  }
+  function ultimoPrecioDe(uid, pid) {
+    if (!uid) return null;
+    for (var i = 0; i < state.pedidos.length; i++) {
+      var p = state.pedidos[i];
+      if (p.cliente_id !== uid || p.estado === 'anulado') continue;
+      var it = (p.items || []).find(function (x) { return x.id === pid; });
+      if (it) return num(it.precio);
+    }
+    return null;
+  }
+  function pintarResultados() {
+    var q = state.venta.q;
+    var vis = state.productos.filter(function (p) {
+      if (!p.activo) return false;
+      if (q && !coincide(p.nombre + ' ' + p.marca + ' ' + p.categoria, q)) return false;
+      return true;
+    }).slice(0, 12);
+    $('v-resultados').innerHTML = vis.map(function (p) {
+      var thumb = p.imagen ? '<img src="../tienda/' + esc(p.imagen) + '" alt="" loading="lazy">' : '<div class="v-ph">' + esc(p.nombre.charAt(0)) + '</div>';
+      var chip = p.stock <= 0 ? '<span class="v-chip fuera">Agotado</span>' : (p.stock <= 5 ? '<span class="v-chip pocas">' + p.stock + '</span>' : '');
+      return '<button class="v-card' + (p.stock <= 0 ? ' agotada' : '') + '" data-v-add="' + esc(p.id) + '"' + (p.stock <= 0 ? ' disabled' : '') + '>' +
+        thumb + chip +
+        '<span class="v-nombre">' + esc(p.nombre) + '</span>' +
+        '<span class="v-precio">' + fmt(p.precio) + '</span>' +
+        '</button>';
+    }).join('') || '<div class="pl-empty">Sin resultados para esa búsqueda.</div>';
+  }
+  function pintarTicket() {
+    var total = 0;
+    var html = state.venta.items.map(function (it) {
+      var p = prodDe(it.id);
+      if (!p) return '';
+      var pu = precioAplicado(p, it.qty);
+      var sub = pu * it.qty;
+      total += sub;
+      var esMayor = pu < num(p.precio);
+      var hist = ultimoPrecioDe(state.venta.cliente, it.id);
+      var hint = (hist != null && Math.abs(hist - pu) > 0.005) ? '<div class="v-hint">Última vez a este cliente: ' + fmt(hist) + '</div>' : '';
+      return '<div class="t-item"><div class="t-info"><div class="t-nombre">' + esc(p.nombre) + '</div>' +
+        '<div class="t-meta">' + fmt(pu) + (esMayor ? ' <b class="tag-mayor">por mayor</b>' : '') + (it.qty > p.stock ? ' <b class="txt-alerta">¡solo hay ' + p.stock + '!</b>' : '') + '</div>' + hint + '</div>' +
+        '<div class="step"><button data-v-dec="' + esc(it.id) + '">−</button><span>' + it.qty + '</span><button data-v-inc="' + esc(it.id) + '">+</button></div>' +
+        '<div class="d-sub">' + fmt(sub) + '</div>' +
+        '<button class="d-x" data-v-del="' + esc(it.id) + '">✕</button></div>';
+    }).join('');
+    $('v-items').innerHTML = html || '<div class="pl-empty">Toca productos de la izquierda para armar la venta.</div>';
+    $('v-total').textContent = fmt(total);
+    $('v-parcial-row').style.display = $('v-pago').value === 'parcial' ? 'flex' : 'none';
+    return total;
+  }
+  function ventaAdd(id, delta) {
+    var it = state.venta.items.find(function (x) { return x.id === id; });
+    var p = prodDe(id);
+    if (!it && delta > 0) { state.venta.items.push({ id: id, qty: 1 }); }
+    else if (it) {
+      it.qty += delta;
+      if (p && it.qty > p.stock) { it.qty = p.stock; toast('Solo hay ' + p.stock + ' en stock'); }
+      if (it.qty <= 0) state.venta.items = state.venta.items.filter(function (x) { return x.id !== id; });
+    }
+    pintarTicket();
+  }
+  async function registrarVenta() {
+    if (!state.venta.items.length) { toast('El ticket está vacío', true); return; }
+    var items = [];
+    var total = 0;
+    var falta = state.venta.items.find(function (it) { var p = prodDe(it.id); return !p || it.qty > p.stock; });
+    if (falta) { toast('Hay una línea con más cantidad que el stock', true); return; }
+    state.venta.items.forEach(function (it) {
+      var p = prodDe(it.id);
+      var pu = precioAplicado(p, it.qty);
+      var sub = +(pu * it.qty).toFixed(2);
+      total += sub;
+      items.push({ id: p.id, nombre: p.nombre, qty: it.qty, precio: pu, mayor: pu < num(p.precio), subtotal: sub });
+    });
+    total = +total.toFixed(2);
+    var pago = $('v-pago').value;
+    var monto = pago === 'pagado' ? total : (pago === 'parcial' ? Math.min(total, num($('v-monto').value)) : 0);
+    if (pago === 'parcial' && monto <= 0) { toast('Ingresa el monto recibido', true); return; }
+    var r = await db.from('gasomi_pedidos').insert({
+      items: items, total: total, estado: 'atendido', origen: 'mostrador',
+      vendedor_email: state.usuario.email,
+      cliente_id: state.venta.cliente || null,
+      pago_estado: pago, pago_metodo: $('v-metodo').value, monto_pagado: monto,
+      nota: ''
+    }).select();
+    if (r.error || !r.data.length) { toast('No se pudo registrar: ' + (r.error ? r.error.message : ''), true); return; }
+    toast('Venta #' + r.data[0].id + ' registrada ✓ (' + fmt(total) + ')');
+    state.venta = { cliente: state.venta.cliente, items: [], q: '' };
+    $('v-buscar').value = '';
+    await cargarTodo();
+    render();
   }
 
+  /* ================= Productos ================= */
   function renderChips() {
     var cats = [{ slug: 'todos', nombre: 'Todos' }].concat(state.categorias);
     $('prod-chips').innerHTML = cats.map(function (c) {
       return '<button class="chip' + (state.cat === c.slug ? ' on' : '') + '" data-cat="' + esc(c.slug) + '">' + esc(c.nombre) + '</button>';
     }).join('');
   }
-
+  function catNombre(slug) {
+    var c = state.categorias.find(function (x) { return x.slug === slug; });
+    return c ? c.nombre : slug;
+  }
   function renderProductos() {
-    var q = state.q.toLowerCase();
+    var admin = esAdmin();
     var vis = state.productos.filter(function (p) {
       if (state.cat !== 'todos' && p.categoria !== state.cat) return false;
-      if (q && (p.nombre + ' ' + p.marca).toLowerCase().indexOf(q) === -1) return false;
+      if (state.q && !coincide(p.nombre + ' ' + p.marca, state.q)) return false;
       return true;
     });
     $('prod-tbody').innerHTML = vis.map(function (p) {
@@ -174,68 +397,158 @@
         ? '<img class="prod-thumb" src="../tienda/' + esc(p.imagen) + '" onerror="this.style.display=\'none\'" alt="">'
         : '<div class="prod-thumb-ph">' + esc(p.nombre.charAt(0)) + '</div>';
       var margen = '';
-      if (num(p.costo) > 0) {
-        var m = ((num(p.precio) - num(p.costo)) / num(p.precio)) * 100;
+      if (admin && state.costos[p.id] > 0) {
+        var m = ((num(p.precio) - state.costos[p.id]) / num(p.precio)) * 100;
         margen = '<div class="margen-chip' + (m < 15 ? ' bajo' : '') + '">margen ' + m.toFixed(0) + '%</div>';
       }
       var mayor = num(p.precio_mayor) > 0
         ? fmt(p.precio_mayor) + '<div class="pl-sub">desde ' + p.mayor_desde + ' und.</div>'
         : '<span class="cat-tag">—</span>';
       var stockCls = p.stock <= 0 ? ' stock-cero' : (p.stock <= 5 ? ' stock-bajo' : '');
+      var precioCell = admin
+        ? '<div class="precio-edit"><input type="number" step="0.10" min="0" value="' + num(p.precio).toFixed(2) + '" data-precio="' + esc(p.id) + '"><button class="precio-save" data-save="' + esc(p.id) + '" title="Guardar precio">✓</button></div>' + margen
+        : '<b>' + fmt(p.precio) + '</b>';
+      var stockCell = admin
+        ? '<div class="precio-edit"><input type="number" step="1" min="0" class="input-stock' + stockCls + '" value="' + p.stock + '" data-stock="' + esc(p.id) + '"><button class="precio-save" data-save-stock="' + esc(p.id) + '" title="Guardar stock">✓</button></div>'
+        : '<b class="' + (p.stock <= 5 ? 'txt-alerta' : '') + '">' + p.stock + '</b>';
+      var visibleCell = admin
+        ? '<button class="switch' + (p.activo ? ' on' : '') + '" data-activo="' + esc(p.id) + '"></button>'
+        : '<span class="cat-tag">' + (p.activo ? 'Sí' : 'No') + '</span>';
+      var editCell = admin ? '<button class="icon-btn" data-edit="' + esc(p.id) + '" title="Editar producto">✎</button>' : '';
       return '<tr data-id="' + esc(p.id) + '">' +
         '<td><div class="prod-cell">' + thumb + '<div><div class="prod-nombre">' + esc(p.nombre) + '</div><div class="prod-marca">' + esc(p.marca) + ' · ' + esc(p.unidad) + '</div></div></div></td>' +
-        '<td><div class="precio-edit"><input type="number" step="0.10" min="0" value="' + num(p.precio).toFixed(2) + '" data-precio="' + esc(p.id) + '"><button class="precio-save" data-save="' + esc(p.id) + '" title="Guardar precio">✓</button></div>' + margen + '</td>' +
+        '<td>' + precioCell + '</td>' +
         '<td>' + mayor + '</td>' +
-        '<td><div class="precio-edit"><input type="number" step="1" min="0" class="input-stock' + stockCls + '" value="' + p.stock + '" data-stock="' + esc(p.id) + '"><button class="precio-save" data-save-stock="' + esc(p.id) + '" title="Guardar stock">✓</button></div></td>' +
-        '<td><button class="switch' + (p.activo ? ' on' : '') + '" data-activo="' + esc(p.id) + '" title="Mostrar u ocultar en la tienda"></button></td>' +
-        '<td><button class="icon-btn" data-edit="' + esc(p.id) + '" title="Editar producto">✎</button></td>' +
+        '<td>' + stockCell + '</td>' +
+        '<td>' + visibleCell + '</td>' +
+        '<td>' + editCell + '</td>' +
         '</tr>';
     }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Sin resultados.</td></tr>';
   }
 
+  /* ================= Pedidos ================= */
+  function renderPedChips() {
+    var filtros = [['todos', 'Todos'], ['nuevo', 'Nuevos'], ['atendido', 'Atendidos'], ['porcobrar', 'Por cobrar'], ['anulado', 'Anulados']];
+    $('ped-chips').innerHTML = filtros.map(function (f) {
+      return '<button class="chip' + (state.pedFiltro === f[0] ? ' on' : '') + '" data-pedf="' + f[0] + '">' + f[1] + '</button>';
+    }).join('');
+  }
   function renderPedidos() {
-    $('pedidos-list').innerHTML = state.pedidos.map(function (p) {
+    var vis = state.pedidos.filter(function (p) {
+      if (state.pedFiltro === 'todos') return true;
+      if (state.pedFiltro === 'porcobrar') return p.estado === 'atendido' && deudaDe(p) > 0;
+      return p.estado === state.pedFiltro;
+    });
+    $('pedidos-list').innerHTML = vis.map(function (p) {
       var items = (p.items || []).map(function (i) {
         return '<div><span>' + i.qty + ' × ' + esc(i.nombre) + (i.mayor ? ' <b class="tag-mayor">por mayor</b>' : '') + '</span><span>' + fmt(i.subtotal) + '</span></div>';
       }).join('');
+      var c = clienteDe(p.cliente_id);
+      var wa = telWa(c);
       var cli = p.cliente_id
-        ? '<span class="pedido-cliente">' + esc(nombreCliente(p.cliente_id)) + (p.puntos_otorgados ? ' · <b class="tag-pts">puntos otorgados</b>' : '') + '</span>'
+        ? '<span class="pedido-cliente">' + esc(nombreCliente(p.cliente_id)) + (p.puntos_otorgados ? ' · <b class="tag-pts">pts ✓</b>' : '') + '</span>'
         : '<span class="pedido-cliente">Sin cuenta</span>';
+      var origen = '<span class="tag-origen' + (p.origen === 'mostrador' ? ' mostrador' : '') + '">' + (p.origen === 'mostrador' ? 'Mostrador' : 'Tienda web') + '</span>';
+      var deuda = deudaDe(p);
+      var pagoBadge = p.pago_estado === 'pagado'
+        ? '<span class="pago-badge ok">Pagado' + (p.pago_metodo ? ' · ' + esc(p.pago_metodo) : '') + '</span>'
+        : '<span class="pago-badge deuda">Debe ' + fmt(deuda) + '</span>';
+      var waBtns = wa ? '<div class="wa-plantillas">' +
+        '<a target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola ' + (c.nombre || '') + '! Confirmamos tu pedido #' + p.id + ' por ' + fmt(p.total) + '. Coordinamos la entrega. — Gasomi Ingenieros') + '">Confirmar 💬</a>' +
+        '<a target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola ' + (c.nombre || '') + '! Tu pedido #' + p.id + ' ya está listo para entrega o recojo. — Gasomi Ingenieros') + '">Listo 💬</a>' +
+        (deuda > 0 ? '<a target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola ' + (c.nombre || '') + '! Te recordamos el saldo pendiente de ' + fmt(deuda) + ' del pedido #' + p.id + '. Yape/Plin: 958 682 246. ¡Gracias! — Gasomi') + '">Cobrar 💬</a>' : '') +
+        '</div>' : '';
       return '<div class="pedido-card"><div class="pedido-head">' +
         '<span class="pedido-id">#' + p.id + '</span>' +
         '<span class="pedido-fecha">' + fecha(p.created_at) + '</span>' +
-        cli +
+        origen + cli + pagoBadge +
         '<select class="pedido-estado" data-estado="' + p.id + '">' +
         ['nuevo', 'atendido', 'anulado'].map(function (e) { return '<option value="' + e + '"' + (p.estado === e ? ' selected' : '') + '>' + e + '</option>'; }).join('') +
+        '</select>' +
+        '<select class="pedido-estado" data-pago="' + p.id + '">' +
+        [['pendiente', 'por cobrar'], ['parcial', 'pago parcial'], ['pagado', 'pagado']].map(function (e) { return '<option value="' + e[0] + '"' + (p.pago_estado === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('') +
         '</select>' +
         '<span class="pedido-total">' + fmt(p.total) + '</span>' +
         '</div>' +
         (p.nota ? '<div class="pedido-nota">' + esc(p.nota) + '</div>' : '') +
+        (p.vendedor_email ? '<div class="pl-sub" style="margin-top:6px">Vendedor: ' + esc(p.vendedor_email) + '</div>' : '') +
+        waBtns +
         '<div class="pedido-items">' + items + '</div></div>';
-    }).join('') || '<div class="pl-empty">Aún no hay pedidos. Cuando un cliente envíe su carrito por WhatsApp, quedará registrado aquí y descontará stock automáticamente.</div>';
+    }).join('') || '<div class="pl-empty" style="padding:16px">No hay pedidos con ese filtro.</div>';
   }
 
+  /* ================= Clientes + 360 ================= */
   function renderClientes() {
     $('cli-tbody').innerHTML = state.clientes.map(function (c) {
-      return '<tr>' +
+      var peds = state.pedidos.filter(function (p) { return p.cliente_id === c.user_id && p.estado !== 'anulado'; });
+      var totalHist = peds.reduce(function (a, p) { return a + num(p.total); }, 0);
+      return '<tr class="cli-row" data-cli="' + esc(c.user_id) + '">' +
         '<td><div class="prod-nombre">' + esc(c.nombre || '—') + '</div><div class="pl-sub">' + esc(c.email) + '</div></td>' +
         '<td>' + esc(c.telefono || '—') + '</td>' +
         '<td>' + esc(c.empresa || '—') + '</td>' +
-        '<td><b class="pts-badge">' + c.puntos + ' pts</b><div class="pl-sub">= ' + fmt(Math.floor(c.puntos / 10)) + '</div></td>' +
-        '<td><span class="cat-tag">' + fecha(c.created_at) + '</span></td>' +
-        '<td><button class="icon-btn" data-puntos="' + esc(c.user_id) + '" title="Ajustar puntos (canje o bono)">±</button></td>' +
+        '<td><b class="pts-badge">' + c.puntos + ' pts</b></td>' +
+        '<td>' + peds.length + ' pedidos<div class="pl-sub">' + fmt(totalHist) + '</div></td>' +
+        '<td><button class="icon-btn" data-cli-ver="' + esc(c.user_id) + '" title="Ver ficha del cliente">👁</button></td>' +
         '</tr>';
-    }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Todavía no hay clientes registrados. Los que creen su cuenta en la tienda aparecerán aquí con sus 50 puntos de bienvenida.</td></tr>';
+    }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Todavía no hay clientes registrados.</td></tr>';
   }
 
+  function abrirCliente(uid) {
+    var c = clienteDe(uid);
+    if (!c) return;
+    var peds = state.pedidos.filter(function (p) { return p.cliente_id === uid; }).slice(0, 6);
+    var deuda = state.pedidos.filter(function (p) { return p.cliente_id === uid && p.estado === 'atendido'; })
+      .reduce(function (a, p) { return a + deudaDe(p); }, 0);
+    var wa = telWa(c);
+    $('cli-titulo').textContent = c.nombre || c.email;
+    $('cli-body').innerHTML =
+      '<div class="cli-grid">' +
+      '<div><div class="pl-sub">Contacto</div><b>' + esc(c.telefono || '—') + '</b><div class="pl-sub">' + esc(c.email) + '</div></div>' +
+      '<div><div class="pl-sub">Empresa</div><b>' + esc(c.empresa || '—') + '</b></div>' +
+      '<div><div class="pl-sub">Puntos</div><b class="pts-badge">' + c.puntos + ' pts</b></div>' +
+      '<div><div class="pl-sub">Deuda</div><b class="' + (deuda > 0 ? 'txt-alerta' : '') + '">' + fmt(deuda) + '</b></div>' +
+      '</div>' +
+      '<div class="cli-acciones">' +
+      (wa ? '<a class="btn-mini-wa" target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola ' + (c.nombre || '') + '! Te saluda el equipo de Gasomi Ingenieros 👷') + '">WhatsApp 💬</a>' : '') +
+      '<button class="btn-ghost btn-mini" data-cli-venta="' + esc(uid) + '">Nueva venta</button>' +
+      (ultimoPedidoDe(uid) ? '<button class="btn-ghost btn-mini" data-cli-repetir="' + esc(uid) + '">Repetir último pedido</button>' : '') +
+      '<button class="btn-ghost btn-mini" data-cli-tarea="' + esc(uid) + '">+ Tarea</button>' +
+      (esAdmin() ? '<button class="btn-ghost btn-mini" data-puntos="' + esc(uid) + '">± Puntos</button>' : '') +
+      '</div>' +
+      '<h4 class="cli-sub">Últimos pedidos</h4>' +
+      (peds.map(function (p) {
+        return '<div class="pl-row"><div class="pl-main">#' + p.id + ' · ' + esc(p.estado) + (deudaDe(p) > 0 && p.estado === 'atendido' ? ' · <b class="txt-alerta">debe ' + fmt(deudaDe(p)) + '</b>' : '') +
+          '<div class="pl-sub">' + fecha(p.created_at) + ' · ' + (p.items || []).length + ' líneas</div></div><span class="pl-val">' + fmt(p.total) + '</span></div>';
+      }).join('') || '<div class="pl-empty">Sin pedidos aún.</div>');
+    $('cli-bg').style.display = 'flex';
+  }
+  $('cli-close').addEventListener('click', function () { $('cli-bg').style.display = 'none'; });
+  $('cli-bg').addEventListener('click', function (e) { if (e.target === $('cli-bg')) $('cli-bg').style.display = 'none'; });
+
+  /* ================= Historial + Equipo ================= */
   function renderHistorial() {
+    if (!esAdmin()) { $('hist-tbody').innerHTML = ''; return; }
     $('hist-tbody').innerHTML = state.historial.map(function (h) {
       var nom = h.gasomi_productos ? h.gasomi_productos.nombre : h.producto_id;
       return '<tr><td>' + fecha(h.created_at) + '</td><td>' + esc(nom) + '</td><td><span class="tag-tipo' + (h.tipo === 'mayor' ? ' mayor' : '') + '">' + (h.tipo === 'mayor' ? 'por mayor' : 'unidad') + '</span></td><td>' + fmt(h.precio_anterior) + '</td><td><b>' + fmt(h.precio_nuevo) + '</b></td><td>' + esc(h.cambiado_por || '—') + '</td></tr>';
     }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Sin cambios registrados.</td></tr>';
   }
 
-  /* ---------- Acciones ---------- */
+  var equipo = [];
+  async function renderEquipo() {
+    if (!esAdmin() || !$('eq-tbody')) return;
+    var r = await db.from('gasomi_crm_usuarios').select('*').order('created_at');
+    equipo = r.data || [];
+    $('eq-tbody').innerHTML = equipo.map(function (u) {
+      var esYo = state.usuario && u.email === state.usuario.email;
+      return '<tr><td>' + esc(u.nombre || '—') + (esYo ? ' <span class="pl-sub">(tú)</span>' : '') + '</td><td>' + esc(u.email) + '</td>' +
+        '<td><span class="rol-badge' + (u.rol === 'admin' ? ' admin' : '') + '">' + esc(u.rol) + '</span></td>' +
+        '<td>' + (esYo ? '<span class="cat-tag">activo</span>' : '<button class="switch' + (u.activo ? ' on' : '') + '" data-eq-activo="' + esc(u.email) + '"></button>') + '</td>' +
+        '<td><span class="cat-tag">' + fecha(u.created_at) + '</span></td></tr>';
+    }).join('');
+  }
+
+  /* ================= Acciones globales ================= */
   async function updateProducto(id, patch, okMsg) {
     var r = await db.from('gasomi_productos').update(patch).eq('id', id).select();
     if (r.error || !r.data || !r.data.length) { toast('No se pudo guardar: ' + (r.error ? r.error.message : 'sin permisos'), true); return false; }
@@ -246,11 +559,177 @@
   }
 
   document.addEventListener('input', function (e) {
-    if (e.target.dataset && (e.target.dataset.precio || e.target.dataset.stock)) e.target.closest('.precio-edit').classList.add('dirty');
-    if (e.target.id === 'prod-buscar') { state.q = e.target.value; renderProductos(); }
-    if (e.target.id === 'e-precio' || e.target.id === 'e-costo') pintarMargen();
+    var t = e.target;
+    if (t.dataset && (t.dataset.precio || t.dataset.stock)) t.closest('.precio-edit').classList.add('dirty');
+    if (t.id === 'prod-buscar') { state.q = t.value; renderProductos(); }
+    if (t.id === 'v-buscar') { state.venta.q = t.value; pintarResultados(); }
+    if (t.id === 'e-precio' || t.id === 'e-costo') pintarMargen();
   });
 
+  document.addEventListener('click', async function (e) {
+    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
+    if (!t) return;
+    var d = t.dataset || {};
+    if (d.cat) { state.cat = d.cat; renderChips(); renderProductos(); return; }
+    if (d.pedf) { state.pedFiltro = d.pedf; renderPedChips(); renderPedidos(); return; }
+    if (d.save) {
+      var input = document.querySelector('input[data-precio="' + d.save + '"]');
+      var val = parseFloat(input.value);
+      if (isNaN(val) || val < 0) { toast('Precio inválido', true); return; }
+      if (await updateProducto(d.save, { precio: val }, 'Precio actualizado ✓ (la tienda ya lo muestra)')) {
+        input.closest('.precio-edit').classList.remove('dirty');
+        renderMiDia(); await refrescarHistorial();
+      }
+      return;
+    }
+    if (d.saveStock) {
+      var inputS = document.querySelector('input[data-stock="' + d.saveStock + '"]');
+      var valS = parseInt(inputS.value, 10);
+      if (isNaN(valS) || valS < 0) { toast('Stock inválido', true); return; }
+      if (await updateProducto(d.saveStock, { stock: valS }, 'Stock actualizado ✓')) {
+        inputS.closest('.precio-edit').classList.remove('dirty');
+        renderMiDia(); renderProductos();
+      }
+      return;
+    }
+    if (d.activo) {
+      var p = prodDe(d.activo);
+      if (await updateProducto(p.id, { activo: !p.activo }, p.activo ? 'Producto oculto en la tienda' : 'Producto visible en la tienda')) {
+        t.classList.toggle('on'); renderMiDia();
+      }
+      return;
+    }
+    if (d.edit) { abrirModal(d.edit); return; }
+    if (d.puntos) { await ajustarPuntos(d.puntos); return; }
+    if (d.atender) {
+      var rA = await db.from('gasomi_pedidos').update({ estado: 'atendido' }).eq('id', parseInt(d.atender, 10)).select();
+      if (rA.error || !rA.data.length) { toast('No se pudo atender', true); return; }
+      toast('Pedido #' + d.atender + ' atendido ✓');
+      await cargarTodo(); render();
+      return;
+    }
+    if (d.tareaOk) {
+      await db.from('gasomi_tareas').update({ hecho: true }).eq('id', parseInt(d.tareaOk, 10));
+      state.tareas = state.tareas.filter(function (x) { return x.id !== parseInt(d.tareaOk, 10); });
+      renderMiDia();
+      return;
+    }
+    if (t.id === 'tarea-btn') {
+      var texto = $('tarea-texto').value.trim();
+      if (!texto) return;
+      var rT = await db.from('gasomi_tareas').insert({ texto: texto, vendedor_email: state.usuario.email }).select();
+      if (rT.data && rT.data.length) { state.tareas.push(rT.data[0]); $('tarea-texto').value = ''; renderMiDia(); toast('Tarea agregada ✓'); }
+      return;
+    }
+    if (d.vAdd) { ventaAdd(d.vAdd, 1); return; }
+    if (d.vInc) { ventaAdd(d.vInc, 1); return; }
+    if (d.vDec) { ventaAdd(d.vDec, -1); return; }
+    if (d.vDel) { state.venta.items = state.venta.items.filter(function (x) { return x.id !== d.vDel; }); pintarTicket(); return; }
+    if (t.id === 'v-registrar') { await registrarVenta(); return; }
+    if (t.id === 'v-repetir' || d.cliRepetir) {
+      var uidR = d.cliRepetir || state.venta.cliente;
+      var up = ultimoPedidoDe(uidR);
+      if (up) {
+        state.venta.cliente = uidR;
+        state.venta.items = (up.items || []).map(function (i) {
+          var p = prodDe(i.id);
+          return p ? { id: i.id, qty: Math.min(i.qty, Math.max(1, p.stock)) } : null;
+        }).filter(Boolean);
+        $('cli-bg').style.display = 'none';
+        irA('venta');
+        toast('Último pedido cargado al ticket ✓');
+      }
+      return;
+    }
+    if (d.cliVenta) { state.venta.cliente = d.cliVenta; $('cli-bg').style.display = 'none'; irA('venta'); return; }
+    if (d.cliTarea) {
+      var txt = prompt('Tarea o seguimiento para ' + nombreCliente(d.cliTarea) + ':', 'Hacer seguimiento a la cotización');
+      if (!txt) return;
+      var rCT = await db.from('gasomi_tareas').insert({ texto: txt, cliente_id: d.cliTarea, vendedor_email: state.usuario.email }).select();
+      if (rCT.data && rCT.data.length) { state.tareas.push(rCT.data[0]); renderMiDia(); toast('Tarea agregada ✓'); }
+      return;
+    }
+    if (d.cliVer) { abrirCliente(d.cliVer); return; }
+    if (t.classList && t.classList.contains('cli-row') && !e.target.closest('button')) { abrirCliente(t.dataset.cli); return; }
+    if (d.eqActivo) {
+      var u = equipo.find(function (x) { return x.email === d.eqActivo; });
+      var rU = await db.from('gasomi_crm_usuarios').update({ activo: !u.activo }).eq('email', u.email).select();
+      if (rU.error || !rU.data.length) { toast('No se pudo actualizar', true); return; }
+      toast(u.email + (u.activo ? ' desactivado' : ' activado'));
+      renderEquipo();
+      return;
+    }
+    if (t.id === 'eq-add') {
+      var em = $('eq-email').value.trim().toLowerCase();
+      if (!em || em.indexOf('@') < 1) { toast('Correo inválido', true); return; }
+      var rE = await db.from('gasomi_crm_usuarios').insert({ email: em, nombre: $('eq-nombre').value.trim(), rol: $('eq-rol').value }).select();
+      if (rE.error) { toast(rE.error.message.indexOf('duplicate') > -1 ? 'Ese correo ya está en el equipo' : 'No se pudo agregar', true); return; }
+      $('eq-email').value = ''; $('eq-nombre').value = '';
+      toast(em + ' agregado al equipo ✓ — dile que cree su cuenta desde la pantalla de ingreso');
+      renderEquipo();
+      return;
+    }
+  });
+
+  document.addEventListener('change', async function (e) {
+    var t = e.target;
+    if (t.id === 'v-cliente') { state.venta.cliente = t.value; pintarVenta(); return; }
+    if (t.id === 'v-pago') { pintarTicket(); return; }
+    if (t.dataset && t.dataset.estado) {
+      var id = parseInt(t.dataset.estado, 10);
+      var r = await db.from('gasomi_pedidos').update({ estado: t.value }).eq('id', id).select();
+      if (r.error || !r.data.length) { toast('No se pudo actualizar el pedido', true); return; }
+      await cargarTodo(); render();
+      var msgs = { atendido: 'Pedido #' + id + ' atendido — stock y puntos aplicados', anulado: 'Pedido #' + id + ' anulado — stock devuelto', nuevo: 'Pedido #' + id + ' → nuevo' };
+      toast(msgs[t.value] || 'Pedido actualizado');
+      return;
+    }
+    if (t.dataset && t.dataset.pago) {
+      var idP = parseInt(t.dataset.pago, 10);
+      var ped = state.pedidos.find(function (p) { return p.id === idP; });
+      var patch = { pago_estado: t.value };
+      if (t.value === 'pagado') { patch.monto_pagado = num(ped.total); if (!ped.pago_metodo) patch.pago_metodo = 'efectivo'; }
+      if (t.value === 'pendiente') patch.monto_pagado = 0;
+      if (t.value === 'parcial') {
+        var m = parseFloat(prompt('¿Cuánto pagó hasta ahora? (total ' + fmt(ped.total) + ')', ped.monto_pagado || '') || '');
+        if (isNaN(m) || m <= 0 || m >= num(ped.total)) { toast('Monto inválido para pago parcial', true); renderPedidos(); return; }
+        patch.monto_pagado = m;
+      }
+      var rP = await db.from('gasomi_pedidos').update(patch).eq('id', idP).select();
+      if (rP.error || !rP.data.length) { toast('No se pudo actualizar el pago', true); return; }
+      var iP = state.pedidos.findIndex(function (p) { return p.id === idP; });
+      if (iP > -1) state.pedidos[iP] = rP.data[0];
+      renderPedidos(); renderMiDia();
+      toast('Pago del pedido #' + idP + ' actualizado ✓');
+      return;
+    }
+  });
+
+  async function ajustarPuntos(uid) {
+    var c = clienteDe(uid);
+    if (!c) return;
+    var deltaStr = prompt('Ajustar puntos de ' + (c.nombre || c.email) + ' (tiene ' + c.puntos + ' pts).\nPositivo abona, negativo canjea. Ej: -120');
+    if (deltaStr == null) return;
+    var delta = parseInt(deltaStr, 10);
+    if (isNaN(delta) || delta === 0) { toast('Cantidad inválida', true); return; }
+    var motivo = prompt('Motivo:', delta < 0 ? 'Canje en pedido' : 'Bono') || (delta < 0 ? 'Canje' : 'Bono');
+    var nuevos = Math.max(0, c.puntos + delta);
+    var r = await db.from('gasomi_clientes').update({ puntos: nuevos }).eq('user_id', uid).select();
+    if (r.error || !r.data.length) { toast('No se pudo ajustar', true); return; }
+    await db.from('gasomi_puntos_movs').insert({ cliente_id: uid, delta: delta, motivo: motivo + ' (manual)' });
+    c.puntos = nuevos;
+    renderClientes(); $('cli-bg').style.display = 'none';
+    toast('Puntos de ' + (c.nombre || c.email) + ': ' + nuevos + ' pts');
+  }
+
+  async function refrescarHistorial() {
+    if (!esAdmin()) return;
+    var rh = await db.from('gasomi_precios_historial').select('*, gasomi_productos(nombre)').order('created_at', { ascending: false }).limit(200);
+    state.historial = rh.data || [];
+    renderHistorial();
+  }
+
+  /* ================= Ficha de producto (modal admin) ================= */
   function pintarMargen() {
     var pr = parseFloat($('e-precio').value || 0);
     var co = parseFloat($('e-costo').value || 0);
@@ -260,85 +739,12 @@
       el.textContent = 'Margen: ' + fmt(pr - co) + ' por unidad (' + m.toFixed(1) + '%)';
       el.style.color = m < 15 ? 'var(--accent-warm)' : 'var(--ok)';
     } else {
-      el.textContent = 'Registra el costo para ver tu margen (solo se ve aquí, nunca en la tienda).';
+      el.textContent = 'Registra el costo para ver tu margen (solo lo ve el administrador).';
       el.style.color = 'var(--muted)';
     }
   }
-
-  document.addEventListener('click', async function (e) {
-    var t = e.target;
-    if (t.dataset && t.dataset.cat) { state.cat = t.dataset.cat; renderChips(); renderProductos(); return; }
-    if (t.dataset && t.dataset.save) {
-      var input = document.querySelector('input[data-precio="' + t.dataset.save + '"]');
-      var val = parseFloat(input.value);
-      if (isNaN(val) || val < 0) { toast('Precio inválido', true); return; }
-      if (await updateProducto(t.dataset.save, { precio: val }, 'Precio actualizado ✓ (la tienda ya lo muestra)')) {
-        input.closest('.precio-edit').classList.remove('dirty');
-        renderDash(); await refrescarHistorial();
-      }
-      return;
-    }
-    if (t.dataset && t.dataset.saveStock) {
-      var inputS = document.querySelector('input[data-stock="' + t.dataset.saveStock + '"]');
-      var valS = parseInt(inputS.value, 10);
-      if (isNaN(valS) || valS < 0) { toast('Stock inválido', true); return; }
-      if (await updateProducto(t.dataset.saveStock, { stock: valS }, 'Stock actualizado ✓')) {
-        inputS.closest('.precio-edit').classList.remove('dirty');
-        renderDash(); renderProductos();
-      }
-      return;
-    }
-    if (t.dataset && t.dataset.activo) {
-      var p = state.productos.find(function (x) { return x.id === t.dataset.activo; });
-      if (await updateProducto(p.id, { activo: !p.activo }, p.activo ? 'Producto oculto en la tienda' : 'Producto visible en la tienda')) {
-        t.classList.toggle('on'); renderDash();
-      }
-      return;
-    }
-    if (t.dataset && t.dataset.edit) { abrirModal(t.dataset.edit); return; }
-    if (t.dataset && t.dataset.puntos) { await ajustarPuntos(t.dataset.puntos); return; }
-  });
-
-  async function ajustarPuntos(uid) {
-    var c = state.clientes.find(function (x) { return x.user_id === uid; });
-    if (!c) return;
-    var deltaStr = prompt('Ajustar puntos de ' + (c.nombre || c.email) + ' (tiene ' + c.puntos + ' pts).\nEscribe la cantidad: positiva para abonar, negativa para canjear/descontar.\nEj: -120 para canjear 120 puntos.');
-    if (deltaStr == null) return;
-    var delta = parseInt(deltaStr, 10);
-    if (isNaN(delta) || delta === 0) { toast('Cantidad inválida', true); return; }
-    var motivo = prompt('Motivo del ajuste:', delta < 0 ? 'Canje en pedido' : 'Bono') || (delta < 0 ? 'Canje' : 'Bono');
-    var nuevos = Math.max(0, c.puntos + delta);
-    var r = await db.from('gasomi_clientes').update({ puntos: nuevos }).eq('user_id', uid).select();
-    if (r.error || !r.data.length) { toast('No se pudo ajustar', true); return; }
-    await db.from('gasomi_puntos_movs').insert({ cliente_id: uid, delta: delta, motivo: motivo + ' (manual)' });
-    c.puntos = nuevos;
-    renderClientes(); renderDash();
-    toast('Puntos de ' + (c.nombre || c.email) + ': ' + nuevos + ' pts');
-  }
-
-  document.addEventListener('change', async function (e) {
-    if (e.target.dataset && e.target.dataset.estado) {
-      var id = parseInt(e.target.dataset.estado, 10);
-      var r = await db.from('gasomi_pedidos').update({ estado: e.target.value }).eq('id', id).select();
-      if (r.error || !r.data.length) { toast('No se pudo actualizar el pedido', true); return; }
-      var i = state.pedidos.findIndex(function (p) { return p.id === id; });
-      if (i > -1) state.pedidos[i] = r.data[0];
-      await cargarTodo();
-      render();
-      var msgs = { atendido: 'Pedido #' + id + ' atendido — puntos otorgados si tiene cuenta', anulado: 'Pedido #' + id + ' anulado — stock devuelto', nuevo: 'Pedido #' + id + ' → nuevo' };
-      toast(msgs[e.target.value] || 'Pedido actualizado');
-    }
-  });
-
-  async function refrescarHistorial() {
-    var rh = await db.from('gasomi_precios_historial').select('*, gasomi_productos(nombre)').order('created_at', { ascending: false }).limit(200);
-    state.historial = rh.data || [];
-    renderHistorial(); renderDash();
-  }
-
-  /* ---------- Modal ---------- */
   function abrirModal(id) {
-    var p = state.productos.find(function (x) { return x.id === id; });
+    var p = prodDe(id);
     if (!p) return;
     state.editId = id;
     $('edit-title').textContent = p.nombre;
@@ -348,7 +754,7 @@
       return '<option value="' + esc(c.slug) + '"' + (c.slug === p.categoria ? ' selected' : '') + '>' + esc(c.nombre) + '</option>';
     }).join('');
     $('e-precio').value = num(p.precio).toFixed(2);
-    $('e-costo').value = num(p.costo).toFixed(2);
+    $('e-costo').value = (state.costos[p.id] || 0).toFixed(2);
     $('e-precio-mayor').value = num(p.precio_mayor).toFixed(2);
     $('e-mayor-desde').value = p.mayor_desde;
     $('e-stock').value = p.stock;
@@ -372,7 +778,6 @@
       marca: $('e-marca').value.trim(),
       categoria: $('e-categoria').value,
       precio: val,
-      costo: parseFloat($('e-costo').value) || 0,
       precio_mayor: parseFloat($('e-precio-mayor').value) || 0,
       mayor_desde: Math.max(2, parseInt($('e-mayor-desde').value, 10) || 12),
       stock: Math.max(0, parseInt($('e-stock').value, 10) || 0),
@@ -383,7 +788,10 @@
       activo: $('e-activo').checked
     };
     if (await updateProducto(state.editId, patch, 'Producto actualizado ✓')) {
-      cerrarModal(); renderProductos(); renderDash(); await refrescarHistorial();
+      var costo = parseFloat($('e-costo').value) || 0;
+      await db.from('gasomi_costos').upsert({ producto_id: state.editId, costo: costo });
+      state.costos[state.editId] = costo;
+      cerrarModal(); renderProductos(); renderMiDia(); await refrescarHistorial();
     }
   });
 
