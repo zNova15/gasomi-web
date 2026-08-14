@@ -1,0 +1,93 @@
+/* ============================================
+   GASOMI INGENIEROS — TIENDA EPP
+   Blueprint Authority · Retail
+   ============================================ */
+:root {
+  --primary: #000a1e;
+  --primary-container: #002147;
+  --secondary: #00696b;
+  --secondary-light: #00897b;
+  --accent-gold: #f4a100;
+  --accent-warm: #e65100;
+  --surface: #f7fafc;
+  --surface-low: #eef2f5;
+  --surface-high: #ffffff;
+  --surface-dark: #0a1628;
+  --on-primary: #ffffff;
+  --on-surface: #1a2332;
+  --muted: #5a6577;
+  --line: #e3e9ef;
+  --tint-gold: #f4a100;
+  --tint-teal: #00897b;
+  --tint-warm: #e65100;
+  --tint-steel: #4a6fa5;
+  --hazard: repeating-linear-gradient(-45deg, #f4a100 0 14px, #000a1e 14px 28px);
+  --shadow-soft: 0 4px 24px rgba(0, 10, 30, 0.08);
+  --shadow-med: 0 8px 40px rgba(0, 10, 30, 0.14);
+  --radius: 14px;
+  --maxw: 1200px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--on-surface);
+  background: var(--surface);
+  line-height: 1.65;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+/* ---------- Topbar ---------- */
+.topbar { background: var(--primary); color: rgba(255,255,255,0.75); font-size: 0.78rem; }
+.topbar-inner { max-width: var(--maxw); margin: 0 auto; padding: 8px 24px; display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+.topbar b { color: var(--accent-gold); font-weight: 600; }
+
+/* ---------- Nav ---------- */
+.nav { position: sticky; top: 0; z-index: 60; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.nav-inner { max-width: var(--maxw); margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+.brand-mark { width: 42px; height: 42px; border-radius: 50%; background: var(--primary-container); display: flex; align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1.3rem; color: #fff; }
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+.brand-name { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1.02rem; color: var(--primary); letter-spacing: -0.01em; line-height: 1.1; }
+.brand-sub { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--secondary); font-weight: 700; margin-top: 2px; }
+.nav-search { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--surface-low); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; max-width: 460px; }
+.nav-search input { border: none; outline: none; background: transparent; font-family: 'Inter', sans-serif; font-size: 0.92rem; width: 100%; color: var(--on-surface); }
+.nav-search .lupa { color: var(--muted); font-size: 0.9rem; }
+.nav-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.nav-link { font-size: 0.88rem; font-weight: 600; color: var(--on-surface); text-decoration: none; padding: 8px 10px; border-radius: 8px; }
+.nav-link:hover { background: var(--surface-low); color: var(--secondary); }
+.cart-btn { position: relative; display: inline-flex; align-items: center; gap: 10px; background: var(--primary); color: #fff; border: none; cursor: pointer; padding: 11px 20px; border-radius: 10px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.88rem; transition: all 0.25s ease; }
+.cart-btn:hover { background: var(--primary-container); transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+.cart-count { background: var(--accent-gold); color: var(--primary); font-weight: 800; font-size: 0.72rem; min-width: 20px; height: 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; }
+
+/* ---------- Hero ---------- */
+.hero { position: relative; background: linear-gradient(160deg, #000a1e 0%, #001a3a 45%, #002147 100%); color: #fff; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 44px 44px; }
+.hero::after { content: ''; position: absolute; width: 640px; height: 640px; right: -180px; top: -220px; border-radius: 50%; background: radial-gradient(circle, rgba(0,137,123,0.28) 0%, transparent 65%); }
+.hero-inner { position: relative; z-index: 1; max-width: var(--maxw); margin: 0 auto; padding: 88px 24px 72px; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent-gold); margin-bottom: 20px; }
+.hero-eyebrow::before { content: ''; width: 28px; height: 8px; background: var(--hazard); border-radius: 2px; }
+.hero h1 { font-size: clamp(2.1rem, 4.2vw, 3.3rem); font-weight: 800; max-width: 640px; }
+.hero h1 em { font-style: normal; color: #ffc94d; }
+.hero-sub { margin-top: 18px; font-size: 1.06rem; color: rgba(255,255,255,0.72); max-width: 560px; }
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 32px; }
+.btn-gold { display: inline-flex; align-items: center; gap: 10px; background: var(--accent-gold); color: var(--primary); padding: 15px 30px; border-radius: 10px; text-decoration: none; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.95rem; transition: all 0.25s ease; border: none; cursor: pointer; }
+.btn-gold:hover { background: #ffb520; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(244,161,0,0.35); color: var(--primary); }
+.btn-ghost { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: rgba(255,255,255,0.92); padding: 15px 30px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.24); transition: all 0.25s ease; }
+.btn-ghost:hover { border-color: rgba(255,255,255,0.55); background: rgba(255,255,255,0.06); color: #fff; }
+.hero-stats { display: flex; gap: 48px; margin-top: 56px; padding-top: 36px; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
+.hstat-n { font-family: 'Manrope', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
+.hstat-l { font-size: 0.78rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; margin-top: 2px; }
+
+/* ---------- Sección catálogo: chips + búsqueda ---------- */
+.catalogo { padding: 72px 0 96px; }
+.cat-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 28px; }
+.sec-label { display: inline-block; font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--secondary); margin-bottom: 10px; }
+.sec-title { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 800; color: var(--primary); }
+.cat-count { font-size: 0.9rem; color: var(--muted); padding-bottom: 6px; }
+.chips { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+.chip { border: 1px solid var(--line); background: var(--surface-high); color: var(--on-surface); font-family: 'Inter', sans-serif; font-size: 0.84rem; font-weight: 600; padding: 9px 18px; border-radius: 999px; cursor: pointer; transition: all 0.2s ease; }
+.chip:hover { border-color: var(--secondary); color: var(--secondary); }
+.chip.on { background: var(--primary); border-color: var(--primary); color: #fff; }

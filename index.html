@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gasomi Ingenieros E.I.R.L. — Ingeniería, Construcción y Provisión de Materiales en Cajamarca</title>
+    <meta name="description" content="Gasomi Ingenieros E.I.R.L. — Empresa de ingeniería civil, construcción, provisión de materiales y consultoría técnica en Cajamarca, Perú. Más de 10 años de experiencia.">
+    <meta name="keywords" content="Gasomi Ingenieros, construcción Cajamarca, materiales de construcción, ingeniería civil, proveedor de materiales, obras civiles, consultoría técnica, expedientes técnicos, fierro, cemento, arena, Perú">
+    <meta name="author" content="Gasomi Ingenieros E.I.R.L.">
+    <meta property="og:title" content="Gasomi Ingenieros E.I.R.L. — Ingeniería y Materiales en Cajamarca">
+    <meta property="og:description" content="Proveedor integral de materiales de construcción, ejecución de obras civiles y consultoría técnica. Más de 10 años de experiencia en Cajamarca, Perú.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="es_PE">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%23002147'/%3E%3Cpath d='M7 24C7 13 13 8 21 9' stroke='%2300897b' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M9 22C9 15 13 11 19 12' stroke='%231db5b5' stroke-width='2' fill='none' stroke-linecap='round' opacity='0.7'/%3E%3Cpath d='M21 9C25 10 27 14 27 17C27 21 24 24 20 25L17 25L17 19L22 19' stroke='%2300897b' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           GASOMI INGENIEROS — DESIGN SYSTEM
+           Blueprint Authority Aesthetic
+           ============================================ */
+
+        :root {
+            /* Primary Palette */
+            --primary: #000a1e;
+            --primary-container: #002147;
+            --secondary: #00696b;
+            --secondary-light: #00897b;
+            --accent-warm: #e65100;
+            --accent-gold: #f4a100;
+
+            /* Surfaces */
+            --surface: #f7fafc;
+            --surface-low: #f1f4f6;
+            --surface-high: #ffffff;
+            --surface-dark: #0a1628;
+
+            /* Text */
+            --on-primary: #ffffff;
+            --on-surface: #1a2332;
+            --on-surface-muted: #5a6577;
+
+            /* Functional */
+            --gradient-cta: linear-gradient(135deg, #000a1e 0%, #002147 100%);
+            --gradient-hero: linear-gradient(160deg, #000a1e 0%, #001a3a 40%, #002147 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --shadow-soft: 0 4px 24px rgba(0, 10, 30, 0.08);
+            --shadow-medium: 0 8px 40px rgba(0, 10, 30, 0.12);
+            --shadow-strong: 0 16px 64px rgba(0, 10, 30, 0.16);
+
+            /* Layout */
+            --max-width: 1200px;
+            --section-padding: 100px 0;
+            --gutter: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--on-surface);
+            background: var(--surface);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Manrope', sans-serif;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+        }
+
+        /* ============================================
+           NAVIGATION — Glassmorphism
+           ============================================ */
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 10, 30, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .nav.scrolled {
+            background: rgba(0, 10, 30, 0.97);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--gutter);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--on-primary);
+        }
+
+        .nav-logo-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .nav-logo-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nav-logo-text {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-logo-text span {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: -2px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            background: var(--secondary) !important;
+            color: white !important;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 600 !important;
+            transition: all 0.2s !important;
+        }
+
+        .nav-cta:hover {
+            background: var(--secondary-light) !important;
+            transform: translateY(-1px);
+        }
+
+        .nav-cta::after {
+            display: none !important;
+        }
+
+        .nav-mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .nav-mobile-toggle span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: white;
+            margin: 5px 0;
+            transition: all 0.3s;
+        }
+
+        /* ============================================
+           HERO SECTION
+           ============================================ */
+
+        .hero {
+            background: var(--gradient-hero);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 72px;
+        }
+
+        .hero-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('banner gasomi.png') center/cover no-repeat;
+            opacity: 0.15;
+            z-index: 0;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -10%;
+            width: 60%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='600' height='600' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='grid' width='40' height='40' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 40 0 L 0 0 0 40' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E") repeat;
+            opacity: 0.6;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 120px;
+            background: linear-gradient(to top, var(--surface) 0%, transparent 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 720px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 105, 107, 0.2);
+            border: 1px solid rgba(0, 105, 107, 0.3);
+            padding: 8px 18px;
+            border-radius: 100px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 28px;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--secondary-light);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 3.8rem);
+            font-weight: 800;
+            color: var(--on-primary);
+            margin-bottom: 24px;
+            line-height: 1.08;
+        }
+
+        .hero h1 .highlight {
+            color: var(--secondary-light);
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            max-width: 560px;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--secondary);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 105, 107, 0.35);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 16px 32px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            margin-top: 64px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .hero-stat {
+            text-align: left;
+        }
+
+        .hero-stat-number {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-stat-label {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           SECTION STYLES
+           ============================================ */
+
+        .section {
+            padding: var(--section-padding);
+        }
+
+        .section-dark {
+            background: var(--surface-low);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--on-surface-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           ABOUT SECTION
+           ============================================ */
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .about-content p {
+            color: var(--on-surface-muted);
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .about-highlights {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 36px;
+        }
+
+        .about-highlight {
+            padding: 24px;
+            background: var(--surface-high);
+            border-radius: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .about-highlight-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 105, 107, 0.08);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+            font-size: 1.3rem;
+        }
+
+        .about-highlight h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .about-highlight p {
+            font-size: 0.85rem;
+            color: var(--on-surface-muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .about-image-wrapper {
+            position: relative;
+        }
+
+        .about-image {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--primary-container);
+            aspect-ratio: 4/3;
+            position: relative;
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .about-image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 32px;
+            background: linear-gradient(to top, rgba(0,10,30,0.85) 0%, transparent 100%);
+            text-align: center;
+        }
+
+        .about-image-overlay .logo-display {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .about-image-overlay .logo-sub {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .about-image-badge {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            background: var(--secondary);
+            color: white;
+            padding: 20px 28px;
+            border-radius: 14px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .about-image-badge strong {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            display: block;
+        }
+
+        .about-image-badge span {
+            font-size: 0.78rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        /* ============================================
+           SERVICES SECTION
+           ============================================ */
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .service-card {
+            background: var(--surface-high);
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-cta);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(0, 105, 107, 0.08);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .service-card p {
+            color: var(--on-surface-muted);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .service-card ul {
+            list-style: none;
+            margin-top: 16px;
+        }
+
+        .service-card li {
+            padding: 6px 0;
+            font-size: 0.88rem;
+            color: var(--on-surface-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .service-card li::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--secondary);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Featured service card */
+        .service-card.featured {
+            background: var(--gradient-cta);
+            color: white;
+            grid-row: span 2;
+        }
+
+        .service-card.featured::before {
+            display: none;
+        }
+
+        .service-card.featured .service-card-icon {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .service-card.featured h3 {
+            color: white;
+            font-size: 1.4rem;
+        }
+
+        .service-card.featured p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .service-card.featured li {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .service-card.featured li::before {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .service-featured-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+        }
+
+        /* ============================================
+           PROCESS / HOW WE WORK
+           ============================================ */
+
+        .process-timeline {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            position: relative;
+        }
+
+        .process-timeline::before {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 12.5%;
+            right: 12.5%;
+            height: 2px;
+            background: linear-gradient(to right, var(--secondary), var(--primary-container));
+            z-index: 0;
+        }
+
+        .process-step {
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .process-step-number {
+            width: 80px;
+            height: 80px;
+            background: var(--surface-high);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--secondary);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .process-step:hover .process-step-number {
+            background: var(--secondary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .process-step h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .process-step p {
+            font-size: 0.88rem;
+            color: var(--on-surface-muted);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           DATA / NUMBERS
+           ============================================ */
+
+        .numbers-section {
+            background: var(--gradient-hero);
+            padding: 80px 0;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+
+        .number-item {
+            padding: 32px 16px;
+        }
+
+        .number-value {
+            font-family: 'Manrope', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -0.03em;
+        }
+
+        .number-label {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* ============================================
+           PROJECTS / PORTFOLIO
+           ============================================ */
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .project-card {
+            border-radius: 16px;
+            overflow: hidden;
+            background: var(--surface-high);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .project-card-image {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .project-card-image::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0,10,30,0.7), transparent);
+        }
+
+        .project-card-category {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(0, 105, 107, 0.9);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            z-index: 2;
+        }
+
+        .project-card-body {
+            padding: 24px;
+        }
+
+        .project-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .project-card p {
+            font-size: 0.88rem;
+            color: var(--on-surface-muted);
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           CONTACT SECTION
+           ============================================ */
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: start;
+        }
+
+        .contact-info h2 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .contact-info > p {
+            color: var(--on-surface-muted);
+            font-size: 1.05rem;
+            margin-bottom: 40px;
+        }
+
+        .contact-items {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .contact-item-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(0, 105, 107, 0.08);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .contact-item-text h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .contact-item-text p {
+            font-size: 0.9rem;
+            color: var(--on-surface-muted);
+        }
+
+        .contact-item-text a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .contact-item-text a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-form-wrapper {
+            background: var(--surface-high);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .contact-form-wrapper h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--on-surface);
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--surface-low);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            color: var(--on-surface);
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--secondary);
+            background: var(--surface-high);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--gradient-cta);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+
+        .footer {
+            background: var(--primary);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 64px 0 32px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px;
+            margin-bottom: 48px;
+        }
+
+        .footer-brand .nav-logo-text {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+
+        .footer-brand p {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-top: 16px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .footer-col h4 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 20px;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 12px;
+        }
+
+        .footer-col a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 0.88rem;
+            transition: color 0.2s;
+        }
+
+        .footer-col a:hover {
+            color: white;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .footer-social a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+        }
+
+        .footer-social a:hover {
+            background: var(--secondary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* ============================================
+           WHATSAPP FLOATING BUTTON
+           ============================================ */
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 999;
+            width: 60px;
+            height: 60px;
+            background: #25D366;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
+        }
+
+        .whatsapp-float svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.7s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+
+        @media (max-width: 992px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 48px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .service-card.featured {
+                grid-row: auto;
+                grid-column: span 2;
+            }
+
+            .process-timeline {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .process-timeline::before {
+                display: none;
+            }
+
+            .numbers-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 48px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --section-padding: 64px 0;
+            }
+
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 72px;
+                left: 0;
+                right: 0;
+                background: rgba(0, 10, 30, 0.98);
+                flex-direction: column;
+                padding: 24px;
+                gap: 8px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links a {
+                display: block;
+                padding: 12px 16px;
+                border-radius: 8px;
+            }
+
+            .nav-links a:hover {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .nav-links a::after {
+                display: none;
+            }
+
+            .nav-cta {
+                text-align: center;
+                margin-top: 8px;
+            }
+
+            .nav-mobile-toggle {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-card.featured {
+                grid-column: auto;
+            }
+
+            .process-timeline {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .about-image-badge {
+                bottom: -12px;
+                right: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================
+         NAVIGATION
+         ========================================== -->
+    <nav class="nav" id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <div class="nav-logo-icon"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L."></div>
+                <div class="nav-logo-text">
+                    GASOMI
+                    <span>Ingenieros E.I.R.L.</span>
+                </div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#nosotros">Nosotros</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#proceso">Proceso</a></li>
+                <li><a href="#proyectos">Proyectos</a></li>
+                <li><a href="tienda/">Tienda EPP</a></li>
+                <li><a href="#contacto" class="nav-cta">Cotizar</a></li>
+            </ul>
+            <button class="nav-mobile-toggle" id="navToggle" aria-label="Menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==========================================
+         HERO
+         ========================================== -->
+    <section class="hero" id="inicio">
+        <div class="hero-bg-image"></div>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">Cajamarca, Perú — Desde 2015</div>
+                <h1>Ingeniería y materiales que <span class="highlight">construyen</span> el futuro de Cajamarca</h1>
+                <p class="hero-subtitle">Somos su proveedor integral de materiales de construcción, ejecución de obras civiles y consultoría técnica. Más de 10 años respaldando proyectos de infraestructura con calidad, cumplimiento y confianza.</p>
+                <div class="hero-actions">
+                    <a href="#contacto" class="btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Solicitar Cotización
+                    </a>
+                    <a href="#servicios" class="btn-secondary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        Ver Servicios
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">10+</div>
+                        <div class="hero-stat-label">Años de experiencia</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">15</div>
+                        <div class="hero-stat-label">Profesionales</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">5</div>
+                        <div class="hero-stat-label">Líneas de negocio</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">100%</div>
+                        <div class="hero-stat-label">Cumplimiento de plazos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         ABOUT / NOSOTROS
+         ========================================== -->
+    <section class="section" id="nosotros">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content fade-in">
+                    <span class="section-label">Quiénes Somos</span>
+                    <h2>Compromiso, experiencia y solidez en cada proyecto</h2>
+                    <p>Gasomi Ingenieros E.I.R.L. es una empresa cajamarquina fundada en 2015, especializada en la provisión de materiales de construcción, ejecución de obras civiles y consultoría técnica. Estamos inscritos en el Registro Nacional de Proveedores del Estado (OSCE) y contamos con un equipo multidisciplinario de arquitectos, ingenieros civiles y técnicos especializados.</p>
+                    <p>Nuestra fortaleza es la atención oportuna y el cumplimiento riguroso de plazos. Trabajamos con empresas constructoras que ejecutan proyectos de infraestructura pública y privada en la región, abasteciendo materiales certificados y brindando soporte técnico integral.</p>
+                    <div class="about-highlights">
+                        <div class="about-highlight">
+                            <div class="about-highlight-icon">&#9879;</div>
+                            <h4>Equipo Técnico</h4>
+                            <p>Arquitectos, ingenieros civiles y especialistas con herramientas como AutoCAD y Revit</p>
+                        </div>
+                        <div class="about-highlight">
+                            <div class="about-highlight-icon">&#9733;</div>
+                            <h4>Registro OSCE</h4>
+                            <p>Inscritos en el Registro Nacional de Proveedores para contrataciones con el Estado</p>
+                        </div>
+                        <div class="about-highlight">
+                            <div class="about-highlight-icon">&#10003;</div>
+                            <h4>Cumplimiento</h4>
+                            <p>Entregamos a tiempo, sin retrasos. Nuestro compromiso es con los plazos ofertados</p>
+                        </div>
+                        <div class="about-highlight">
+                            <div class="about-highlight-icon">&#9830;</div>
+                            <h4>Desde 2015</h4>
+                            <p>Más de una década construyendo confianza en Cajamarca y el norte del Perú</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image-wrapper fade-in">
+                    <div class="about-image">
+                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=80&auto=format&fit=crop" alt="Obra de construcción civil - Gasomi Ingenieros" loading="lazy">
+                        <div class="about-image-overlay">
+                            <div class="logo-display">GASOMI</div>
+                            <div class="logo-sub">Ingenieros E.I.R.L.</div>
+                        </div>
+                    </div>
+                    <div class="about-image-badge">
+                        <strong>10+</strong>
+                        <span>Años construyendo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SERVICES
+         ========================================== -->
+    <section class="section section-dark" id="servicios">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Nuestros Servicios</span>
+                <h2 class="section-title">Soluciones integrales para su proyecto</h2>
+                <p class="section-subtitle">Desde el suministro de materiales hasta la elaboración de expedientes técnicos, cubrimos todo el ciclo de su obra.</p>
+            </div>
+
+            <div class="services-grid">
+                <!-- FEATURED: Provisión de Bienes -->
+                <div class="service-card featured fade-in">
+                    <div class="service-featured-badge">Servicio Principal</div>
+                    <div class="service-card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                    </div>
+                    <h3>Provisión de Materiales de Construcción</h3>
+                    <p>Somos su proveedor de confianza para abastecer obras con materiales certificados y a precios competitivos. Coordinamos entregas directas a obra con especificaciones técnicas precisas.</p>
+                    <ul>
+                        <li>Fierro y acero estructural</li>
+                        <li>Cemento y agregados</li>
+                        <li>Arena, piedra y materiales pétreos</li>
+                        <li>Clavos, pernos y ferretería general</li>
+                        <li>Equipos e insumos especializados</li>
+                        <li>Cotizaciones técnicas detalladas</li>
+                    </ul>
+                </div>
+
+                <!-- Obras Civiles -->
+                <div class="service-card fade-in">
+                    <div class="service-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><rect x="1" y="6" width="22" height="16" rx="2"/><path d="M1 10h22"/><path d="M9 6V2"/><path d="M15 6V2"/></svg>
+                    </div>
+                    <h3>Ejecución de Obras Civiles</h3>
+                    <p>Construcción de infraestructura pública y privada con equipo técnico propio.</p>
+                    <ul>
+                        <li>Colegios e instituciones</li>
+                        <li>Carreteras y vías</li>
+                        <li>Sistemas de agua potable</li>
+                        <li>Obras civiles en general</li>
+                    </ul>
+                </div>
+
+                <!-- Consultoría -->
+                <div class="service-card fade-in">
+                    <div class="service-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <h3>Consultoría Técnica</h3>
+                    <p>Asesoría especializada y elaboración de documentación técnica para proyectos.</p>
+                    <ul>
+                        <li>Expedientes técnicos</li>
+                        <li>Perfiles de proyectos</li>
+                        <li>Saneamiento físico legal</li>
+                        <li>Asesoría en gestión municipal</li>
+                    </ul>
+                </div>
+
+                <!-- Servicios Generales -->
+                <div class="service-card fade-in">
+                    <div class="service-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                    </div>
+                    <h3>Servicios Generales</h3>
+                    <p>Mantenimiento y servicios diversos para instituciones y empresas.</p>
+                    <ul>
+                        <li>Mantenimiento de edificaciones</li>
+                        <li>Pintura institucional</li>
+                        <li>Mantenimiento de jardines</li>
+                        <li>Reparación de mobiliario</li>
+                    </ul>
+                </div>
+
+                <!-- Trabajos Especializados -->
+                <div class="service-card fade-in">
+                    <div class="service-card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    </div>
+                    <h3>Trabajos Especializados</h3>
+                    <p>Fabricación e instalación de estructuras a medida.</p>
+                    <ul>
+                        <li>Estructuras metálicas</li>
+                        <li>Trabajos en madera</li>
+                        <li>Fabricación a medida</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         PROCESS / CÓMO TRABAJAMOS
+         ========================================== -->
+    <section class="section" id="proceso">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Cómo Trabajamos</span>
+                <h2 class="section-title">Un proceso transparente de principio a fin</h2>
+                <p class="section-subtitle">Desde su primer contacto hasta la entrega final, cada paso está planificado para garantizar calidad y cumplimiento.</p>
+            </div>
+
+            <div class="process-timeline">
+                <div class="process-step fade-in">
+                    <div class="process-step-number">01</div>
+                    <h4>Solicitud y Requerimiento</h4>
+                    <p>Recibimos su solicitud con las especificaciones técnicas de los materiales o el alcance del proyecto requerido.</p>
+                </div>
+                <div class="process-step fade-in">
+                    <div class="process-step-number">02</div>
+                    <h4>Cotización Técnica</h4>
+                    <p>Nuestro equipo de logística e ingeniería elabora una cotización detallada con productos bien especificados.</p>
+                </div>
+                <div class="process-step fade-in">
+                    <div class="process-step-number">03</div>
+                    <h4>Orden y Coordinación</h4>
+                    <p>Una vez aprobada la cotización, coordinamos la logística de abastecimiento con nuestros proveedores fijos.</p>
+                </div>
+                <div class="process-step fade-in">
+                    <div class="process-step-number">04</div>
+                    <h4>Entrega Puntual</h4>
+                    <p>Cumplimos con los plazos ofertados. Realizamos seguimiento exhaustivo del cronograma hasta la entrega final.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         NUMBERS
+         ========================================== -->
+    <section class="numbers-section">
+        <div class="container">
+            <div class="numbers-grid">
+                <div class="number-item fade-in">
+                    <div class="number-value">2015</div>
+                    <div class="number-label">Año de fundación</div>
+                </div>
+                <div class="number-item fade-in">
+                    <div class="number-value">15</div>
+                    <div class="number-label">Profesionales en el equipo</div>
+                </div>
+                <div class="number-item fade-in">
+                    <div class="number-value">5</div>
+                    <div class="number-label">Líneas de negocio</div>
+                </div>
+                <div class="number-item fade-in">
+                    <div class="number-value">OSCE</div>
+                    <div class="number-label">Registro de proveedor del Estado</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         PROJECTS / ÁREAS DE TRABAJO
+         ========================================== -->
+    <section class="section section-dark" id="proyectos">
+        <div class="container">
+            <div class="section-header fade-in">
+                <span class="section-label">Áreas de Trabajo</span>
+                <h2 class="section-title">Proyectos que transforman Cajamarca</h2>
+                <p class="section-subtitle">Nuestra experiencia abarca desde la provisión de materiales para grandes obras hasta la consultoría técnica especializada.</p>
+            </div>
+
+            <div class="projects-grid">
+                <div class="project-card fade-in">
+                    <div class="project-card-image" style="background: linear-gradient(135deg, rgba(0,33,71,0.6), rgba(0,105,107,0.6)), url('https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=600&q=80&auto=format&fit=crop') center/cover;">
+                        <span class="project-card-category">Provisión</span>
+                    </div>
+                    <div class="project-card-body">
+                        <h3>Abastecimiento para Obras Públicas</h3>
+                        <p>Suministro de fierro, cemento, agregados y ferretería general para constructoras que ejecutan obras de infraestructura en Cajamarca.</p>
+                    </div>
+                </div>
+
+                <div class="project-card fade-in">
+                    <div class="project-card-image" style="background: linear-gradient(135deg, rgba(0,10,30,0.5), rgba(0,33,71,0.5)), url('https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=600&q=80&auto=format&fit=crop') center/cover;">
+                        <span class="project-card-category">Obras Civiles</span>
+                    </div>
+                    <div class="project-card-body">
+                        <h3>Construcción de Infraestructura</h3>
+                        <p>Ejecución de colegios, carreteras, sistemas de agua potable y obras civiles en general para el sector público y privado.</p>
+                    </div>
+                </div>
+
+                <div class="project-card fade-in">
+                    <div class="project-card-image" style="background: linear-gradient(135deg, rgba(0,105,107,0.5), rgba(0,33,71,0.5)), url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80&auto=format&fit=crop') center/cover;">
+                        <span class="project-card-category">Consultoría</span>
+                    </div>
+                    <div class="project-card-body">
+                        <h3>Expedientes Técnicos y Perfiles</h3>
+                        <p>Elaboración profesional de expedientes técnicos, perfiles de inversión y saneamiento físico legal con equipo de ingenieros especializados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         CTA BANNER
+         ========================================== -->
+    <section style="background: linear-gradient(135deg, var(--secondary) 0%, #004d4f 100%); padding: 64px 0; text-align: center;">
+        <div class="container fade-in">
+            <h2 style="font-family: 'Manrope', sans-serif; font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; color: white; margin-bottom: 16px; letter-spacing: -0.02em;">¿Necesita materiales para su obra?</h2>
+            <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem; max-width: 560px; margin: 0 auto 32px;">Cotizamos en menos de 24 horas. Entrega puntual garantizada. Escríbanos por WhatsApp y le atendemos de inmediato.</p>
+            <a href="https://wa.me/51958682246?text=Hola%2C%20necesito%20una%20cotización%20de%20materiales%20para%20mi%20obra." class="btn-primary" target="_blank" style="background: white; color: var(--primary); font-size: 1rem; padding: 18px 36px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.474A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
+                Cotizar por WhatsApp
+            </a>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         CONTACT
+         ========================================== -->
+    <section class="section" id="contacto">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info fade-in">
+                    <span class="section-label">Contáctenos</span>
+                    <h2>Hablemos de su próximo proyecto</h2>
+                    <p>Estamos listos para atender su requerimiento. Escríbanos por WhatsApp para una respuesta rápida o complete el formulario y nos pondremos en contacto.</p>
+
+                    <div class="contact-items">
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            </div>
+                            <div class="contact-item-text">
+                                <h4>Teléfono / WhatsApp</h4>
+                                <p><a href="https://wa.me/51958682246" target="_blank">+51 958 682 246</a></p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            </div>
+                            <div class="contact-item-text">
+                                <h4>Oficina Cajamarca</h4>
+                                <p>Jr. Puyllucana No. 391<br>Cajamarca, Cajamarca, Perú</p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                            </div>
+                            <div class="contact-item-text">
+                                <h4>Facebook</h4>
+                                <p><a href="https://www.facebook.com/Gasomi.Ingenieros/" target="_blank">@Gasomi.Ingenieros</a></p>
+                            </div>
+                        </div>
+
+                        <div class="contact-item">
+                            <div class="contact-item-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            </div>
+                            <div class="contact-item-text">
+                                <h4>RUC</h4>
+                                <p>20600097726</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-wrapper fade-in">
+                    <h3>Solicite una cotización</h3>
+                    <form id="contactForm" onsubmit="handleSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nombre">Nombre completo</label>
+                                <input type="text" id="nombre" name="nombre" placeholder="Ing. Juan Pérez" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono">Teléfono</label>
+                                <input type="tel" id="telefono" name="telefono" placeholder="+51 999 999 999" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="empresa">Empresa / Proyecto</label>
+                            <input type="text" id="empresa" name="empresa" placeholder="Nombre de su empresa o proyecto">
+                        </div>
+                        <div class="form-group">
+                            <label for="servicio">Servicio requerido</label>
+                            <select id="servicio" name="servicio" required>
+                                <option value="" disabled selected>Seleccione un servicio</option>
+                                <option value="materiales">Provisión de Materiales</option>
+                                <option value="obras">Ejecución de Obras Civiles</option>
+                                <option value="consultoria">Consultoría Técnica / Expedientes</option>
+                                <option value="servicios">Servicios Generales / Mantenimiento</option>
+                                <option value="estructuras">Estructuras Metálicas / Madera</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mensaje">Detalle su requerimiento</label>
+                            <textarea id="mensaje" name="mensaje" placeholder="Describa los materiales, cantidades, plazos o el alcance del proyecto que necesita..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit">
+                            Enviar Solicitud
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         FOOTER
+         ========================================== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="nav-logo" style="margin-bottom: 16px;">
+                        <div class="nav-logo-icon"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L."></div>
+                        <div class="nav-logo-text">
+                            GASOMI
+                            <span>Ingenieros E.I.R.L.</span>
+                        </div>
+                    </div>
+                    <p>Empresa de ingeniería civil, construcción y provisión de materiales fundada en 2015 en Cajamarca. Inscritos en el Registro Nacional de Proveedores del Estado (OSCE). RUC 20600097726.</p>
+                    <div class="footer-social">
+                        <a href="https://www.facebook.com/Gasomi.Ingenieros/" target="_blank" aria-label="Facebook">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        </a>
+                        <a href="https://wa.me/51958682246" target="_blank" aria-label="WhatsApp">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.474A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.09 0-4.042-.636-5.661-1.725l-.406-.255-2.735.874.876-2.685-.275-.418A9.72 9.72 0 0 1 2.25 12c0-5.385 4.365-9.75 9.75-9.75S21.75 6.615 21.75 12s-4.365 9.75-9.75 9.75z"/></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Servicios</h4>
+                    <ul>
+                        <li><a href="tienda/">Tienda EPP</a></li>
+                        <li><a href="#servicios">Materiales de Construcción</a></li>
+                        <li><a href="#servicios">Obras Civiles</a></li>
+                        <li><a href="#servicios">Consultoría Técnica</a></li>
+                        <li><a href="#servicios">Servicios Generales</a></li>
+                        <li><a href="#servicios">Estructuras Metálicas</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Empresa</h4>
+                    <ul>
+                        <li><a href="#nosotros">Sobre Nosotros</a></li>
+                        <li><a href="#proceso">Cómo Trabajamos</a></li>
+                        <li><a href="#proyectos">Proyectos</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Contacto</h4>
+                    <ul>
+                        <li><a href="https://wa.me/51958682246">+51 958 682 246</a></li>
+                        <li><a href="#">Jr. Puyllucana No. 391</a></li>
+                        <li><a href="#">Cajamarca, Perú</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>&copy; 2025 Gasomi Ingenieros E.I.R.L. Todos los derechos reservados. RUC: 20600097726</span>
+                <span>Cajamarca, Perú</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         WHATSAPP FLOAT BUTTON
+         ========================================== -->
+    <a href="https://wa.me/51958682246?text=Hola%2C%20estoy%20interesado%20en%20los%20servicios%20de%20Gasomi%20Ingenieros.%20Quisiera%20solicitar%20una%20cotización." class="whatsapp-float" target="_blank" aria-label="Chatear por WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.474A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.09 0-4.042-.636-5.661-1.725l-.406-.255-2.735.874.876-2.685-.275-.418A9.72 9.72 0 0 1 2.25 12c0-5.385 4.365-9.75 9.75-9.75S21.75 6.615 21.75 12s-4.365 9.75-9.75 9.75z"/></svg>
+    </a>
+
+    <!-- ==========================================
+         SCRIPTS
+         ========================================== -->
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const spans = navToggle.querySelectorAll('span');
+            if (navLinks.classList.contains('active')) {
+                spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+                spans[1].style.opacity = '0';
+                spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+            } else {
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            }
+        });
+
+        // Close mobile nav on link click
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                const spans = navToggle.querySelectorAll('span');
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Form handler — sends to WhatsApp
+        function handleSubmit(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const telefono = document.getElementById('telefono').value;
+            const empresa = document.getElementById('empresa').value;
+            const servicio = document.getElementById('servicio').value;
+            const mensaje = document.getElementById('mensaje').value;
+
+            const servicioTexto = {
+                'materiales': 'Provisión de Materiales',
+                'obras': 'Ejecución de Obras Civiles',
+                'consultoria': 'Consultoría Técnica / Expedientes',
+                'servicios': 'Servicios Generales / Mantenimiento',
+                'estructuras': 'Estructuras Metálicas / Madera',
+                'otro': 'Otro'
+            };
+
+            const text = `*Nueva Solicitud de Cotización*%0A%0A` +
+                `*Nombre:* ${nombre}%0A` +
+                `*Teléfono:* ${telefono}%0A` +
+                `*Empresa/Proyecto:* ${empresa || 'No especificado'}%0A` +
+                `*Servicio:* ${servicioTexto[servicio] || servicio}%0A` +
+                `*Detalle:* ${mensaje}`;
+
+            window.open(`https://wa.me/51958682246?text=${text}`, '_blank');
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
