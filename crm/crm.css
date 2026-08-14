@@ -158,3 +158,17 @@ input:focus, select:focus, textarea:focus { outline: 2px solid rgba(0, 105, 107,
   .edit-grid { grid-template-columns: 1fr; }
   .edit-grid .span2, .edit-grid .check { grid-column: span 1; }
 }
+/* Fase 3: stock, mayoreo, clientes y puntos */
+.kpi-alerta { color: var(--accent-warm) !important; }
+.kpi-aviso { color: #b58900 !important; }
+.margen-chip { font-size: 0.68rem; color: var(--ok); font-weight: 700; margin-top: 3px; }
+.margen-chip.bajo { color: var(--accent-warm); }
+.margen-hint { font-size: 0.8rem; padding: 4px 2px; }
+.input-stock.stock-cero { border-color: var(--accent-warm); background: #fff3ec; font-weight: 800; }
+.input-stock.stock-bajo { border-color: #e8c56a; background: #fff8e8; font-weight: 700; }
+.tag-mayor, .tag-tipo.mayor { color: var(--secondary); font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+.tag-tipo { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.tag-pts { color: #8a6400; font-size: 0.72rem; }
+.pts-badge { color: var(--primary); font-family: 'Manrope', sans-serif; }
+.pedido-cliente { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.pedido-nota { margin-top: 8px; font-size: 0.8rem; color: #8a6400; background: #fff8e8; border-radius: 8px; padding: 6px 12px; display: inline-block; }

@@ -1,0 +1,99 @@
+/* Tienda EPP — Fase 3: filtros laterales, stock, cuenta de cliente, puntos y precio por mayor */
+
+/* ---------- Promo puntos ---------- */
+.promo { background: #fff8e8; border-top: 1px solid #f4e3b8; border-bottom: 1px solid #f4e3b8; }
+.promo-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px 24px; display: flex; gap: 8px 22px; justify-content: center; flex-wrap: wrap; font-size: 0.82rem; color: #6b5518; }
+.promo b { color: #8a6400; }
+.promo .dot { color: var(--accent-gold); font-weight: 800; }
+
+/* ---------- Layout con sidebar ---------- */
+.cat-layout { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 28px; align-items: start; }
+.filtros { position: sticky; top: 86px; background: var(--surface-high); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 20px; max-height: calc(100vh - 110px); overflow-y: auto; }
+.f-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.f-title { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.95rem; color: var(--primary); }
+.f-clear { background: none; border: none; color: var(--secondary); font-size: 0.76rem; font-weight: 700; cursor: pointer; padding: 4px; }
+.f-clear:hover { text-decoration: underline; }
+.f-sec { border-top: 1px solid var(--surface-low); padding: 14px 0 4px; margin-top: 10px; }
+.f-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+.f-cat { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; background: none; border: none; text-align: left; padding: 7px 10px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--on-surface); }
+.f-cat:hover { background: var(--surface-low); color: var(--secondary); }
+.f-cat.on { background: var(--primary); color: #fff; }
+.f-cat .n { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.f-cat.on .n { color: rgba(255, 255, 255, 0.6); }
+.f-check { display: flex; align-items: center; gap: 9px; padding: 6px 2px; font-size: 0.85rem; cursor: pointer; color: var(--on-surface); }
+.f-check input { accent-color: var(--secondary); width: 15px; height: 15px; cursor: pointer; }
+.f-check .n { margin-left: auto; font-size: 0.72rem; color: var(--muted); }
+.f-precio { display: flex; align-items: center; gap: 8px; }
+.f-precio input { width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.84rem; font-family: 'Inter', sans-serif; }
+.f-precio span { color: var(--muted); font-size: 0.8rem; }
+
+/* Toolbar sobre el grid */
+.cat-toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
+.cat-toolbar .cat-count { padding-bottom: 0; margin-right: auto; }
+.orden-sel { padding: 9px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--surface-high); font-size: 0.84rem; font-weight: 600; color: var(--on-surface); cursor: pointer; font-family: 'Inter', sans-serif; }
+.f-toggle { display: none; align-items: center; gap: 8px; background: var(--primary); color: #fff; border: none; border-radius: 9px; padding: 10px 16px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.84rem; cursor: pointer; }
+
+/* ---------- Stock ---------- */
+.stock-chip { position: absolute; right: 12px; top: 12px; z-index: 2; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 9px; border-radius: 6px; }
+.stock-chip.pocas { background: var(--accent-gold); color: var(--primary); }
+.stock-chip.fuera { background: #3d4654; color: #fff; }
+.card.agotado .ph-img, .card.agotado .ph-mono { filter: grayscale(1); opacity: 0.55; }
+.card.agotado .precio { color: var(--muted); }
+.add-btn:disabled { background: #cdd6de; color: #7b8794; cursor: not-allowed; box-shadow: none; }
+.stock-line { font-size: 0.7rem; color: var(--muted); }
+.stock-line.ok { color: #1a7f42; font-weight: 600; }
+
+/* ---------- Precio por mayor ---------- */
+.mayor-line { font-size: 0.74rem; color: var(--secondary); font-weight: 700; background: rgba(0, 137, 123, 0.08); border-radius: 6px; padding: 3px 8px; align-self: flex-start; }
+.d-mayor { display: inline-block; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--secondary); background: rgba(0, 137, 123, 0.1); border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+
+/* ---------- Canje de puntos en el carrito ---------- */
+.canje-box { display: none; align-items: center; gap: 10px; background: #fff8e8; border: 1px solid #f4e3b8; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; font-size: 0.82rem; color: #6b5518; }
+.canje-box.visible { display: flex; }
+.canje-box input { accent-color: var(--accent-gold); width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+.canje-box b { color: #8a6400; }
+.desc-row { display: flex; justify-content: space-between; font-size: 0.86rem; color: #1a7f42; font-weight: 700; margin-bottom: 2px; }
+
+/* ---------- Cuenta de cliente ---------- */
+.cuenta-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--surface-low); color: var(--primary); border: 1px solid var(--line); cursor: pointer; padding: 10px 16px; border-radius: 10px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.85rem; transition: all 0.2s ease; }
+.cuenta-btn:hover { border-color: var(--secondary); color: var(--secondary); }
+.cuenta-btn .pts { background: var(--accent-gold); color: var(--primary); font-weight: 800; font-size: 0.7rem; padding: 2px 8px; border-radius: 8px; }
+.cuenta-wrap { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 24px; }
+.cuenta-wrap.visible { display: flex; }
+.cuenta-modal { position: relative; z-index: 101; background: var(--surface-high); border-radius: 18px; width: 100%; max-width: 460px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-med); }
+.cuenta-head { padding: 18px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; position: relative; }
+.cuenta-head::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; background: var(--hazard); border-radius: 18px 18px 0 0; }
+.cuenta-head h3 { font-size: 1.05rem; font-weight: 800; color: var(--primary); }
+.cuenta-body { padding: 20px 24px 24px; }
+.cuenta-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.cuenta-tab { flex: 1; background: var(--surface-low); border: 1px solid var(--line); border-radius: 9px; padding: 9px; font-weight: 700; font-size: 0.84rem; cursor: pointer; color: var(--muted); font-family: 'Manrope', sans-serif; }
+.cuenta-tab.on { background: var(--primary); border-color: var(--primary); color: #fff; }
+.cuenta-body label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
+.cuenta-body label input { width: 100%; margin-top: 5px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+.cuenta-msg { font-size: 0.82rem; margin-top: 10px; min-height: 1.2em; }
+.cuenta-msg.err { color: var(--accent-warm); }
+.cuenta-msg.ok { color: #1a7f42; }
+.btn-block { width: 100%; justify-content: center; }
+.puntos-card { background: linear-gradient(135deg, #000a1e 0%, #002147 100%); color: #fff; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
+.puntos-card::after { content: ''; position: absolute; right: -40px; top: -40px; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 161, 0, 0.35), transparent 70%); }
+.puntos-n { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 2rem; }
+.puntos-l { font-size: 0.74rem; color: rgba(255, 255, 255, 0.6); text-transform: uppercase; letter-spacing: 0.08em; }
+.puntos-eq { font-size: 0.8rem; color: var(--accent-gold); font-weight: 700; margin-top: 4px; }
+.cuenta-sec { border-top: 1px solid var(--surface-low); padding-top: 14px; margin-top: 14px; }
+.cuenta-sec h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px; font-family: 'Inter', sans-serif; }
+.mp-row { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--surface-low); font-size: 0.82rem; }
+.mp-row:last-child { border-bottom: none; }
+.mp-est { font-weight: 700; text-transform: capitalize; }
+.mp-est.nuevo { color: var(--accent-warm); }
+.mp-est.atendido { color: #1a7f42; }
+.mp-est.anulado { color: var(--muted); }
+.cuenta-out { background: none; border: 1px solid var(--line); color: var(--muted); padding: 9px 14px; border-radius: 9px; cursor: pointer; font-size: 0.82rem; width: 100%; margin-top: 14px; }
+.cuenta-out:hover { border-color: var(--accent-warm); color: var(--accent-warm); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .cat-layout { grid-template-columns: 1fr; }
+  .filtros { position: fixed; top: 0; left: 0; bottom: 0; width: min(320px, 88vw); max-height: none; border-radius: 0; z-index: 95; transform: translateX(-105%); transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); box-shadow: 12px 0 48px rgba(0, 10, 30, 0.2); }
+  .filtros.open { transform: translateX(0); }
+  .f-toggle { display: inline-flex; }
+}

@@ -50,6 +50,7 @@
                 <button class="side-link on" data-view="dashboard">Dashboard</button>
                 <button class="side-link" data-view="productos">Productos y precios</button>
                 <button class="side-link" data-view="pedidos">Pedidos <span class="side-badge" id="badge-pedidos" style="display:none">0</span></button>
+                <button class="side-link" data-view="clientes">Clientes y puntos</button>
                 <button class="side-link" data-view="historial">Historial de precios</button>
             </nav>
             <div class="side-foot">
@@ -86,7 +87,7 @@
                 <div class="tabla-wrap">
                     <table class="tabla" id="prod-tabla">
                         <thead><tr>
-                            <th>Producto</th><th>Categoría</th><th class="th-precio">Precio (S/)</th><th>Unidad</th><th>Visible</th><th></th>
+                            <th>Producto</th><th class="th-precio">Precio (S/)</th><th>Por mayor</th><th class="th-precio">Stock</th><th>Visible</th><th></th>
                         </tr></thead>
                         <tbody id="prod-tbody"></tbody>
                     </table>
@@ -99,12 +100,23 @@
                 <div id="pedidos-list"></div>
             </section>
 
+            <!-- Clientes -->
+            <section class="view" id="view-clientes" style="display:none">
+                <header class="view-head"><h2>Clientes y puntos</h2><span class="view-sub">50 pts de bienvenida · 1 pt por cada S/ 10 atendido · 10 pts = S/ 1</span></header>
+                <div class="tabla-wrap">
+                    <table class="tabla">
+                        <thead><tr><th>Cliente</th><th>Contacto</th><th>Empresa</th><th>Puntos</th><th>Registro</th><th></th></tr></thead>
+                        <tbody id="cli-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- Historial -->
             <section class="view" id="view-historial" style="display:none">
                 <header class="view-head"><h2>Historial de precios</h2></header>
                 <div class="tabla-wrap">
                     <table class="tabla">
-                        <thead><tr><th>Fecha</th><th>Producto</th><th>Antes</th><th>Después</th><th>Cambiado por</th></tr></thead>
+                        <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Antes</th><th>Después</th><th>Cambiado por</th></tr></thead>
                         <tbody id="hist-tbody"></tbody>
                     </table>
                 </div>
@@ -120,8 +132,13 @@
                 <label class="span2">Nombre<input type="text" id="e-nombre"></label>
                 <label>Marca<input type="text" id="e-marca"></label>
                 <label>Categoría<select id="e-categoria"></select></label>
-                <label>Precio (S/)<input type="number" step="0.10" min="0" id="e-precio"></label>
+                <label>Precio unidad (S/)<input type="number" step="0.10" min="0" id="e-precio"></label>
+                <label>Costo (S/) — interno<input type="number" step="0.10" min="0" id="e-costo"></label>
+                <label>Precio por mayor (S/) — 0 = sin mayoreo<input type="number" step="0.10" min="0" id="e-precio-mayor"></label>
+                <label>Por mayor desde (unidades)<input type="number" step="1" min="2" id="e-mayor-desde"></label>
+                <label>Stock (unidades)<input type="number" step="1" min="0" id="e-stock"></label>
                 <label>Unidad<input type="text" id="e-unidad"></label>
+                <div class="span2 margen-hint" id="e-margen"></div>
                 <label class="span2">Norma / certificación<input type="text" id="e-norma"></label>
                 <label class="span2">Descripción<textarea id="e-descripcion" rows="3"></textarea></label>
                 <label class="span2">Imagen (ruta o URL)<input type="text" id="e-imagen" placeholder="img/mi-producto.jpg o https://…"></label>

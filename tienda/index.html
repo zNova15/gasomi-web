@@ -17,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="tienda.css">
     <link rel="stylesheet" href="tienda-b.css">
+    <link rel="stylesheet" href="tienda-c.css">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -59,6 +60,7 @@
             </div>
             <div class="nav-actions">
                 <a href="#b2b" class="nav-link">Compra por volumen</a>
+                <button class="cuenta-btn" id="cuenta-btn">Mi cuenta</button>
                 <button class="cart-btn" id="cart-btn">Pedido <span class="cart-count" id="cart-count">0</span></button>
             </div>
         </div>
@@ -82,18 +84,40 @@
         </div>
     </header>
 
+    <div class="promo">
+        <div class="promo-inner">
+            <span><span class="dot">●</span> Crea tu cuenta y recibe <b>50 puntos de bienvenida</b></span>
+            <span><span class="dot">●</span> Gana <b>1 punto por cada S/ 10</b> en pedidos atendidos</span>
+            <span><span class="dot">●</span> <b>10 puntos = S/ 1</b> de descuento</span>
+            <span><span class="dot">●</span> Precios <b>por mayor</b> automáticos según cantidad</span>
+        </div>
+    </div>
+
     <section class="catalogo" id="catalogo">
         <div class="wrap">
             <div class="cat-head">
                 <div>
                     <span class="sec-label">Catálogo EPP</span>
-                    <h2 class="sec-title">Equipa a tu personal por categoría</h2>
+                    <h2 class="sec-title">Equipa a tu personal</h2>
                 </div>
-                <span class="cat-count" id="cat-count"></span>
             </div>
-            <div class="chips" id="chips"></div>
-            <div class="grid" id="grid"></div>
-            <div class="sin-result" id="sin-result" style="display:none">No encontramos productos para esa búsqueda. Escríbenos por WhatsApp y lo conseguimos.</div>
+            <div class="cat-layout">
+                <aside class="filtros" id="filtros"></aside>
+                <div class="cat-main">
+                    <div class="cat-toolbar">
+                        <button class="f-toggle" id="f-toggle">Filtros</button>
+                        <span class="cat-count" id="cat-count"></span>
+                        <select class="orden-sel" id="orden-sel" aria-label="Ordenar productos">
+                            <option value="relevancia">Orden: relevancia</option>
+                            <option value="precio-asc">Precio: menor a mayor</option>
+                            <option value="precio-desc">Precio: mayor a menor</option>
+                            <option value="stock">Mayor stock</option>
+                        </select>
+                    </div>
+                    <div class="grid" id="grid"></div>
+                    <div class="sin-result" id="sin-result" style="display:none">No encontramos productos con esos filtros. Escríbenos por WhatsApp y lo conseguimos.</div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -175,6 +199,14 @@
             <div id="d-items"></div>
         </div>
         <div class="drawer-foot">
+            <label class="canje-box" id="canje-box">
+                <input type="checkbox" id="canje-check">
+                <span>Canjear mis <b id="canje-pts">0</b> puntos: <b id="canje-desc">−S/ 0.00</b> de descuento</span>
+            </label>
+            <div class="desc-row" id="desc-row" style="display:none">
+                <span>Descuento por puntos</span>
+                <span id="desc-n">−S/ 0.00</span>
+            </div>
             <div class="total-row">
                 <span class="total-l">Total referencial</span>
                 <span class="total-n" id="total-n">S/ 0.00</span>
@@ -185,11 +217,25 @@
     </aside>
 
     <div id="modal-root"></div>
+
+    <!-- Cuenta de cliente -->
+    <div class="cuenta-wrap" id="cuenta-wrap">
+        <div class="overlay on" id="cuenta-overlay"></div>
+        <div class="cuenta-modal">
+            <div class="cuenta-head">
+                <h3 id="cuenta-title">Mi cuenta</h3>
+                <button class="x-btn" id="cuenta-close">✕</button>
+            </div>
+            <div class="cuenta-body" id="cuenta-body"></div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <script src="productos.js"></script>
     <script src="app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="live.js"></script>
+    <script src="cuenta.js"></script>
 </body>
 </html>

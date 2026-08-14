@@ -1,4 +1,4 @@
-/* Tienda EPP — sincronización en vivo con Supabase (precios editados desde el CRM /crm/).
+/* Tienda EPP — sincronización en vivo con Supabase (catálogo, stock y precios del CRM /crm/).
    Si Supabase no está disponible, la tienda sigue funcionando con el catálogo local (productos.js). */
 (function () {
   'use strict';
@@ -7,11 +7,16 @@
   var SB_URL = 'https://lggxsejjbhkymazgalzm.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxnZ3hzZWpqYmhreW1hemdhbHptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDAwMDAsImV4cCI6MjA5ODk3NjAwMH0.X3yg0OewAb1QoBk4HdeALWR33cv9WVJZIbzNKzUWCT4';
   var db = window.supabase.createClient(SB_URL, SB_KEY);
+  window.__gasomiSB = db; // cliente compartido con cuenta.js
 
   function map(r) {
     return {
       id: r.id, nombre: r.nombre, categoria: r.categoria, marca: r.marca,
-      descripcion: r.descripcion, norma: r.norma, precio: parseFloat(r.precio),
+      descripcion: r.descripcion, norma: r.norma,
+      precio: parseFloat(r.precio),
+      precio_mayor: parseFloat(r.precio_mayor || 0),
+      mayor_desde: parseInt(r.mayor_desde || 12, 10),
+      stock: parseInt(r.stock != null ? r.stock : 99, 10),
       unidad: r.unidad, imagen: r.imagen || ''
     };
   }
@@ -28,34 +33,30 @@
 
   cargar();
 
-  // Realtime: si cambian un precio en el CRM, la tienda lo refleja al instante sin recargar
+  // Realtime: precios y stock cambian en la tienda al instante (ediciones del CRM y pedidos de otros clientes)
   db.channel('gasomi-productos')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'gasomi_productos' }, function () { cargar(); })
     .subscribe();
 
-  // Registrar el pedido en el CRM cuando el cliente lo envía por WhatsApp
-  document.addEventListener('click', function (e) {
+  // Registrar el pedido en el CRM cuando el cliente lo envía por WhatsApp.
+  // Si hay sesión de cliente, el pedido queda firmado (cliente_id) y suma puntos al ser atendido.
+  document.addEventListener('click', async function (e) {
     var a = e.target.closest('#wa-btn');
     if (!a) return;
     try {
-      var cart = JSON.parse(localStorage.getItem('gasomi_epp_cart_v1') || '{}');
-      var cat = window.GASOMI_CATALOGO || { productos: [] };
-      var items = [], total = 0;
-      cat.productos.forEach(function (p) {
-        var q = cart[p.id];
-        if (!q) return;
-        var pr = p.precio != null ? p.precio : p.precio_ref_soles;
-        var sub = pr * q;
-        total += sub;
-        items.push({ id: p.id, nombre: p.nombre, qty: q, precio: pr, subtotal: +sub.toFixed(2) });
-      });
-      if (!items.length) return;
-      fetch(SB_URL + '/rest/v1/gasomi_pedidos', {
-        method: 'POST',
-        keepalive: true,
-        headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-        body: JSON.stringify({ items: items, total: +total.toFixed(2) })
-      });
+      var pedido = window.__gasomiPedidoActual;
+      if (!pedido || !pedido.items.length) return;
+      var uid = null;
+      try {
+        var s = await db.auth.getSession();
+        uid = s.data.session ? s.data.session.user.id : null;
+      } catch (e2) {}
+      db.from('gasomi_pedidos').insert({
+        items: pedido.items,
+        total: pedido.total,
+        nota: pedido.nota || '',
+        cliente_id: uid
+      }).then(function () {});
     } catch (err) { /* nunca bloquear el envío por WhatsApp */ }
   });
 })();
