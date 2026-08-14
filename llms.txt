@@ -6,9 +6,9 @@ Inscrita en OSCE/RNP.
 
 ## Páginas clave
 
-- Web principal: https://gasomi-web.vercel.app/
-- Tienda EPP (catálogo con precios en soles, pedido por WhatsApp): https://gasomi-web.vercel.app/tienda/
-- Política de privacidad: https://gasomi-web.vercel.app/privacidad.html
+- Web principal: https://www.gasomi-ingenieros.cloud/
+- Tienda EPP (catálogo con precios en soles, pedido por WhatsApp): https://www.gasomi-ingenieros.cloud/tienda/
+- Política de privacidad: https://www.gasomi-ingenieros.cloud/privacidad.html
 
 ## Contacto
 

@@ -11,7 +11,7 @@ Ejecutar desde tienda/ cada vez que cambie el catálogo base:  python3 build.py
 """
 import json, os, re, html
 
-BASE = 'https://gasomi-web.vercel.app'
+BASE = 'https://www.gasomi-ingenieros.cloud'
 raw = open('productos.js').read()
 data = json.loads(raw[raw.index('{'):raw.rindex(';')])
 CATS = {c['slug']: c for c in data['categorias']}
