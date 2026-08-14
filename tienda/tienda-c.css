@@ -97,3 +97,8 @@
   .filtros.open { transform: translateX(0); }
   .f-toggle { display: inline-flex; }
 }
+/* Accesibilidad: skip link + focus visible */
+.skip-link { position: absolute; left: -9999px; top: 0; z-index: 200; background: var(--accent-gold); color: var(--primary); font-family: 'Manrope', sans-serif; font-weight: 800; padding: 12px 20px; border-radius: 0 0 10px 0; text-decoration: none; }
+.skip-link:focus { left: 0; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--secondary-light); outline-offset: 2px; }
+.cuenta-legal { font-size: 0.74rem; color: var(--muted); margin-top: 10px; }

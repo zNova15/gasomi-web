@@ -3,14 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gasomi Ingenieros E.I.R.L. — Ingeniería, Construcción y Provisión de Materiales en Cajamarca</title>
-    <meta name="description" content="Gasomi Ingenieros E.I.R.L. — Empresa de ingeniería civil, construcción, provisión de materiales y consultoría técnica en Cajamarca, Perú. Más de 10 años de experiencia.">
-    <meta name="keywords" content="Gasomi Ingenieros, construcción Cajamarca, materiales de construcción, ingeniería civil, proveedor de materiales, obras civiles, consultoría técnica, expedientes técnicos, fierro, cemento, arena, Perú">
+    <title>Gasomi Ingenieros — Construcción y Materiales en Cajamarca</title>
+    <meta name="description" content="Ingeniería civil, ejecución de obras, provisión de materiales de construcción y tienda de EPPs en Cajamarca, Perú. Más de 10 años de experiencia e inscritos en OSCE.">
     <meta name="author" content="Gasomi Ingenieros E.I.R.L.">
-    <meta property="og:title" content="Gasomi Ingenieros E.I.R.L. — Ingeniería y Materiales en Cajamarca">
+    <link rel="canonical" href="https://gasomi-web.vercel.app/">
+    <meta property="og:title" content="Gasomi Ingenieros — Construcción y Materiales en Cajamarca">
     <meta property="og:description" content="Proveedor integral de materiales de construcción, ejecución de obras civiles y consultoría técnica. Más de 10 años de experiencia en Cajamarca, Perú.">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="es_PE">
+    <meta property="og:url" content="https://gasomi-web.vercel.app/">
+    <meta property="og:image" content="https://gasomi-web.vercel.app/og-gasomi.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Gasomi Ingenieros E.I.R.L.",
+      "description": "Empresa de ingeniería civil, construcción, provisión de materiales y equipos de protección personal en Cajamarca, Perú.",
+      "telephone": "+51958682246",
+      "url": "https://gasomi-web.vercel.app/",
+      "image": "https://gasomi-web.vercel.app/og-gasomi.jpg",
+      "foundingDate": "2015",
+      "taxID": "20600097726",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Jr. Puyllucana N° 391",
+        "addressLocality": "Cajamarca",
+        "addressRegion": "Cajamarca",
+        "postalCode": "06004",
+        "addressCountry": "PE"
+      },
+      "sameAs": ["https://www.facebook.com/Gasomi.Ingenieros/"]
+    }
+    </script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='32' height='32' rx='8' fill='%23002147'/%3E%3Cpath d='M7 24C7 13 13 8 21 9' stroke='%2300897b' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M9 22C9 15 13 11 19 12' stroke='%231db5b5' stroke-width='2' fill='none' stroke-linecap='round' opacity='0.7'/%3E%3Cpath d='M21 9C25 10 27 14 27 17C27 21 24 24 20 25L17 25L17 19L22 19' stroke='%2300897b' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -504,7 +529,7 @@
             font-size: 1.3rem;
         }
 
-        .about-highlight h4 {
+        .about-highlight h3 {
             font-size: 0.95rem;
             font-weight: 700;
             color: var(--primary);
@@ -774,7 +799,7 @@
             transform: scale(1.1);
         }
 
-        .process-step h4 {
+        .process-step h3 {
             font-size: 1.05rem;
             font-weight: 700;
             color: var(--primary);
@@ -942,7 +967,7 @@
             flex-shrink: 0;
         }
 
-        .contact-item-text h4 {
+        .contact-item-text h3 {
             font-size: 0.95rem;
             font-weight: 700;
             color: var(--primary);
@@ -1004,6 +1029,20 @@
             transition: all 0.2s;
             outline: none;
         }
+
+        a:focus-visible, button:focus-visible, input:focus-visible,
+        textarea:focus-visible, select:focus-visible {
+            outline: 3px solid var(--secondary-light);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute; left: -9999px; top: 0; z-index: 3000;
+            background: var(--accent-gold); color: var(--primary);
+            font-weight: 800; padding: 12px 20px; text-decoration: none;
+            border-radius: 0 0 10px 0;
+        }
+        .skip-link:focus { left: 0; }
 
         .form-group input:focus,
         .form-group textarea:focus,
@@ -1071,7 +1110,7 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
-        .footer-col h4 {
+        .footer-col h3 {
             font-family: 'Manrope', sans-serif;
             font-size: 0.88rem;
             font-weight: 700;
@@ -1316,6 +1355,7 @@
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#inicio">Saltar al contenido</a>
 
     <!-- ==========================================
          NAVIGATION
@@ -1323,7 +1363,7 @@
     <nav class="nav" id="navbar">
         <div class="nav-inner">
             <a href="#" class="nav-logo">
-                <div class="nav-logo-icon"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L."></div>
+                <div class="nav-logo-icon"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L." width="400" height="358"></div>
                 <div class="nav-logo-text">
                     GASOMI
                     <span>Ingenieros E.I.R.L.</span>
@@ -1344,6 +1384,7 @@
             </button>
         </div>
     </nav>
+    <main id="contenido-principal">
 
     <!-- ==========================================
          HERO
@@ -1401,29 +1442,29 @@
                     <div class="about-highlights">
                         <div class="about-highlight">
                             <div class="about-highlight-icon">&#9879;</div>
-                            <h4>Equipo Técnico</h4>
+                            <h3 class="h4">Equipo Técnico</h3>
                             <p>Arquitectos, ingenieros civiles y especialistas con herramientas como AutoCAD y Revit</p>
                         </div>
                         <div class="about-highlight">
                             <div class="about-highlight-icon">&#9733;</div>
-                            <h4>Registro OSCE</h4>
+                            <h3 class="h4">Registro OSCE</h3>
                             <p>Inscritos en el Registro Nacional de Proveedores para contrataciones con el Estado</p>
                         </div>
                         <div class="about-highlight">
                             <div class="about-highlight-icon">&#10003;</div>
-                            <h4>Cumplimiento</h4>
+                            <h3 class="h4">Cumplimiento</h3>
                             <p>Entregamos a tiempo, sin retrasos. Nuestro compromiso es con los plazos ofertados</p>
                         </div>
                         <div class="about-highlight">
                             <div class="about-highlight-icon">&#9830;</div>
-                            <h4>Desde 2015</h4>
+                            <h3 class="h4">Desde 2015</h3>
                             <p>Más de una década construyendo confianza en Cajamarca y el norte del Perú</p>
                         </div>
                     </div>
                 </div>
                 <div class="about-image-wrapper fade-in">
                     <div class="about-image">
-                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=80&auto=format&fit=crop" alt="Obra de construcción civil - Gasomi Ingenieros" loading="lazy">
+                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=800&q=80&auto=format&fit=crop" alt="Obra de construcción civil - Gasomi Ingenieros" width="800" height="450">
                         <div class="about-image-overlay">
                             <div class="logo-display">GASOMI</div>
                             <div class="logo-sub">Ingenieros E.I.R.L.</div>
@@ -1544,22 +1585,22 @@
             <div class="process-timeline">
                 <div class="process-step fade-in">
                     <div class="process-step-number">01</div>
-                    <h4>Solicitud y Requerimiento</h4>
+                    <h3 class="h4">Solicitud y Requerimiento</h3>
                     <p>Recibimos su solicitud con las especificaciones técnicas de los materiales o el alcance del proyecto requerido.</p>
                 </div>
                 <div class="process-step fade-in">
                     <div class="process-step-number">02</div>
-                    <h4>Cotización Técnica</h4>
+                    <h3 class="h4">Cotización Técnica</h3>
                     <p>Nuestro equipo de logística e ingeniería elabora una cotización detallada con productos bien especificados.</p>
                 </div>
                 <div class="process-step fade-in">
                     <div class="process-step-number">03</div>
-                    <h4>Orden y Coordinación</h4>
+                    <h3 class="h4">Orden y Coordinación</h3>
                     <p>Una vez aprobada la cotización, coordinamos la logística de abastecimiento con nuestros proveedores fijos.</p>
                 </div>
                 <div class="process-step fade-in">
                     <div class="process-step-number">04</div>
-                    <h4>Entrega Puntual</h4>
+                    <h3 class="h4">Entrega Puntual</h3>
                     <p>Cumplimos con los plazos ofertados. Realizamos seguimiento exhaustivo del cronograma hasta la entrega final.</p>
                 </div>
             </div>
@@ -1644,7 +1685,7 @@
         <div class="container fade-in">
             <h2 style="font-family: 'Manrope', sans-serif; font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; color: white; margin-bottom: 16px; letter-spacing: -0.02em;">¿Necesita materiales para su obra?</h2>
             <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem; max-width: 560px; margin: 0 auto 32px;">Cotizamos en menos de 24 horas. Entrega puntual garantizada. Escríbanos por WhatsApp y le atendemos de inmediato.</p>
-            <a href="https://wa.me/51958682246?text=Hola%2C%20necesito%20una%20cotización%20de%20materiales%20para%20mi%20obra." class="btn-primary" target="_blank" style="background: white; color: var(--primary); font-size: 1rem; padding: 18px 36px;">
+            <a href="https://wa.me/51958682246?text=Hola%2C%20necesito%20una%20cotización%20de%20materiales%20para%20mi%20obra." class="btn-primary" target="_blank" rel="noopener" style="background: white; color: var(--primary); font-size: 1rem; padding: 18px 36px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.474A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
                 Cotizar por WhatsApp
             </a>
@@ -1668,8 +1709,8 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                             </div>
                             <div class="contact-item-text">
-                                <h4>Teléfono / WhatsApp</h4>
-                                <p><a href="https://wa.me/51958682246" target="_blank">+51 958 682 246</a></p>
+                                <h3 class="h4">Teléfono / WhatsApp</h3>
+                                <p><a href="https://wa.me/51958682246" target="_blank" rel="noopener">+51 958 682 246</a></p>
                             </div>
                         </div>
 
@@ -1678,7 +1719,7 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                             </div>
                             <div class="contact-item-text">
-                                <h4>Oficina Cajamarca</h4>
+                                <h3 class="h4">Oficina Cajamarca</h3>
                                 <p>Jr. Puyllucana No. 391<br>Cajamarca, Cajamarca, Perú</p>
                             </div>
                         </div>
@@ -1688,8 +1729,8 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                             </div>
                             <div class="contact-item-text">
-                                <h4>Facebook</h4>
-                                <p><a href="https://www.facebook.com/Gasomi.Ingenieros/" target="_blank">@Gasomi.Ingenieros</a></p>
+                                <h3 class="h4">Facebook</h3>
+                                <p><a href="https://www.facebook.com/Gasomi.Ingenieros/" target="_blank" rel="noopener">@Gasomi.Ingenieros</a></p>
                             </div>
                         </div>
 
@@ -1698,7 +1739,7 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             </div>
                             <div class="contact-item-text">
-                                <h4>RUC</h4>
+                                <h3 class="h4">RUC</h3>
                                 <p>20600097726</p>
                             </div>
                         </div>
@@ -1711,11 +1752,11 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="nombre">Nombre completo</label>
-                                <input type="text" id="nombre" name="nombre" placeholder="Ing. Juan Pérez" required>
+                                <input type="text" id="nombre" name="nombre" autocomplete="name" placeholder="Ing. Juan Pérez" required>
                             </div>
                             <div class="form-group">
                                 <label for="telefono">Teléfono</label>
-                                <input type="tel" id="telefono" name="telefono" placeholder="+51 999 999 999" required>
+                                <input type="tel" id="telefono" name="telefono" placeholder="+51 999 999 999" autocomplete="tel" required>
                             </div>
                         </div>
                         <div class="form-group">
@@ -1750,12 +1791,14 @@
     <!-- ==========================================
          FOOTER
          ========================================== -->
+    </main>
+
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
                     <div class="nav-logo" style="margin-bottom: 16px;">
-                        <div class="nav-logo-icon"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L."></div>
+                        <div class="nav-logo-icon"><img src="logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L." width="400" height="358"></div>
                         <div class="nav-logo-text">
                             GASOMI
                             <span>Ingenieros E.I.R.L.</span>
@@ -1763,17 +1806,17 @@
                     </div>
                     <p>Empresa de ingeniería civil, construcción y provisión de materiales fundada en 2015 en Cajamarca. Inscritos en el Registro Nacional de Proveedores del Estado (OSCE). RUC 20600097726.</p>
                     <div class="footer-social">
-                        <a href="https://www.facebook.com/Gasomi.Ingenieros/" target="_blank" aria-label="Facebook">
+                        <a href="https://www.facebook.com/Gasomi.Ingenieros/" target="_blank" rel="noopener" aria-label="Facebook">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                         </a>
-                        <a href="https://wa.me/51958682246" target="_blank" aria-label="WhatsApp">
+                        <a href="https://wa.me/51958682246" target="_blank" rel="noopener" aria-label="WhatsApp">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.474A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.09 0-4.042-.636-5.661-1.725l-.406-.255-2.735.874.876-2.685-.275-.418A9.72 9.72 0 0 1 2.25 12c0-5.385 4.365-9.75 9.75-9.75S21.75 6.615 21.75 12s-4.365 9.75-9.75 9.75z"/></svg>
                         </a>
                     </div>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Servicios</h4>
+                    <h3 class="h4">Servicios</h3>
                     <ul>
                         <li><a href="tienda/">Tienda EPP</a></li>
                         <li><a href="#servicios">Materiales de Construcción</a></li>
@@ -1785,17 +1828,18 @@
                 </div>
 
                 <div class="footer-col">
-                    <h4>Empresa</h4>
+                    <h3 class="h4">Empresa</h3>
                     <ul>
                         <li><a href="#nosotros">Sobre Nosotros</a></li>
                         <li><a href="#proceso">Cómo Trabajamos</a></li>
                         <li><a href="#proyectos">Proyectos</a></li>
                         <li><a href="#contacto">Contacto</a></li>
+                        <li><a href="privacidad.html">Política de Privacidad</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Contacto</h4>
+                    <h3 class="h4">Contacto</h3>
                     <ul>
                         <li><a href="https://wa.me/51958682246">+51 958 682 246</a></li>
                         <li><a href="#">Jr. Puyllucana No. 391</a></li>
@@ -1805,7 +1849,7 @@
             </div>
 
             <div class="footer-bottom">
-                <span>&copy; 2025 Gasomi Ingenieros E.I.R.L. Todos los derechos reservados. RUC: 20600097726</span>
+                <span>&copy; 2026 Gasomi Ingenieros E.I.R.L. Todos los derechos reservados. RUC: 20600097726</span>
                 <span>Cajamarca, Perú</span>
             </div>
         </div>
@@ -1814,7 +1858,7 @@
     <!-- ==========================================
          WHATSAPP FLOAT BUTTON
          ========================================== -->
-    <a href="https://wa.me/51958682246?text=Hola%2C%20estoy%20interesado%20en%20los%20servicios%20de%20Gasomi%20Ingenieros.%20Quisiera%20solicitar%20una%20cotización." class="whatsapp-float" target="_blank" aria-label="Chatear por WhatsApp">
+    <a href="https://wa.me/51958682246?text=Hola%2C%20estoy%20interesado%20en%20los%20servicios%20de%20Gasomi%20Ingenieros.%20Quisiera%20solicitar%20una%20cotización." class="whatsapp-float" target="_blank" rel="noopener" aria-label="Chatear por WhatsApp">
         <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.612-1.474A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-2.09 0-4.042-.636-5.661-1.725l-.406-.255-2.735.874.876-2.685-.275-.418A9.72 9.72 0 0 1 2.25 12c0-5.385 4.365-9.75 9.75-9.75S21.75 6.615 21.75 12s-4.365 9.75-9.75 9.75z"/></svg>
     </a>
 

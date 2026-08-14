@@ -1,0 +1,16 @@
+# Gasomi Ingenieros E.I.R.L.
+
+Empresa de ingeniería civil, construcción y provisión de materiales y equipos
+de protección personal (EPP) en Cajamarca, Perú. RUC 20600097726. Desde 2015.
+Inscrita en OSCE/RNP.
+
+## Páginas clave
+
+- Web principal: https://gasomi-web.vercel.app/
+- Tienda EPP (catálogo con precios en soles, pedido por WhatsApp): https://gasomi-web.vercel.app/tienda/
+- Política de privacidad: https://gasomi-web.vercel.app/privacidad.html
+
+## Contacto
+
+- WhatsApp: +51 958 682 246
+- Dirección: Jr. Puyllucana N° 391, Baños del Inca, Cajamarca, Perú

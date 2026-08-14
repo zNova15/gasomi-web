@@ -76,6 +76,7 @@
       '<label>Correo<input type="email" id="c-email" autocomplete="username" placeholder="tu@correo.com"></label>' +
       '<label>Contraseña<input type="password" id="c-pass" autocomplete="' + (esLogin ? 'current-password' : 'new-password') + '" placeholder="Mínimo 6 caracteres"></label>' +
       '<button class="btn-gold btn-block" id="c-accion">' + (esLogin ? 'Ingresar' : 'Crear cuenta y ganar 50 puntos') + '</button>' +
+      (esLogin ? '' : '<div class="cuenta-legal">Al crear tu cuenta aceptas nuestra <a href="../privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a> (Ley 29733).</div>') +
       '<div class="cuenta-msg" id="c-msg"></div>';
   }
 
