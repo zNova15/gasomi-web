@@ -61,11 +61,15 @@
   }
 
   function phHTML(p, extraCls) {
+    var img = p.imagen
+      ? '<img class="ph-img" loading="lazy" src="' + esc(p.imagen) + '" alt="' + esc(p.nombre) + '" onerror="this.remove()">'
+      : '';
     return '<div class="ph ' + (extraCls || '') + '">' +
       '<div class="ph-glow"></div>' +
       '<div class="ph-mono">' + esc(p.nombre.charAt(0)) + '</div>' +
+      img +
       (extraCls ? '' : '<span class="card-cat">' + esc(SHORTS[p.categoria] || 'EPP') + '</span>') +
-      '<span class="ph-tag">foto producto</span>' +
+      (p.imagen ? '' : '<span class="ph-tag">foto producto</span>') +
       '</div>';
   }
 
@@ -217,4 +221,15 @@
   renderChips();
   renderGrid();
   renderCart();
+
+  // Hook para live.js: reemplaza el catálogo (precios en vivo desde el CRM) y re-renderiza todo
+  window.__gasomiApply = function (cats, prods) {
+    if (cats && cats.length) data.categorias = cats;
+    if (prods && prods.length) data.productos = prods;
+    byId = {}; catIdx = {};
+    data.productos.forEach(function (p) { byId[p.id] = p; });
+    data.categorias.forEach(function (c, i) { catIdx[c.slug] = i; });
+    if (state.modal && !byId[state.modal]) { state.modal = null; }
+    renderChips(); renderGrid(); renderCart(); renderModal();
+  };
 })();

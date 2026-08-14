@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Tienda EPP — Gasomi Ingenieros</title>
+    <meta name="description" content="Panel de administración de la Tienda EPP de Gasomi Ingenieros: productos, precios, pedidos e historial.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="../logo-gasomi.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="crm.css">
+</head>
+<body>
+    <!-- ===== LOGIN ===== -->
+    <div class="login-wrap" id="login-view">
+        <div class="login-card">
+            <div class="login-brand">
+                <img src="../logo-gasomi.png" alt="Logo Gasomi Ingenieros">
+                <div>
+                    <div class="login-name">GASOMI INGENIEROS</div>
+                    <div class="login-sub">CRM · Tienda EPP</div>
+                </div>
+            </div>
+            <h1>Inicia sesión</h1>
+            <p class="login-hint">Acceso solo para administradores de la tienda.</p>
+            <label>Correo
+                <input type="email" id="login-email" autocomplete="username" placeholder="tu@correo.com">
+            </label>
+            <label>Contraseña
+                <input type="password" id="login-pass" autocomplete="current-password" placeholder="••••••••">
+            </label>
+            <button class="btn-primary" id="login-btn">Entrar</button>
+            <div class="login-error" id="login-error"></div>
+        </div>
+    </div>
+
+    <!-- ===== APP ===== -->
+    <div class="app" id="app-view" style="display:none">
+        <aside class="sidebar">
+            <div class="side-brand">
+                <img src="../logo-gasomi.png" alt="Logo Gasomi">
+                <div>
+                    <div class="side-name">GASOMI</div>
+                    <div class="side-sub">CRM · Tienda EPP</div>
+                </div>
+            </div>
+            <nav class="side-nav">
+                <button class="side-link on" data-view="dashboard">Dashboard</button>
+                <button class="side-link" data-view="productos">Productos y precios</button>
+                <button class="side-link" data-view="pedidos">Pedidos <span class="side-badge" id="badge-pedidos" style="display:none">0</span></button>
+                <button class="side-link" data-view="historial">Historial de precios</button>
+            </nav>
+            <div class="side-foot">
+                <a href="../tienda/" target="_blank" class="side-tienda">Ver tienda ↗</a>
+                <div class="side-user" id="side-user"></div>
+                <button class="side-out" id="logout-btn">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <main class="main">
+            <!-- Dashboard -->
+            <section class="view" id="view-dashboard">
+                <header class="view-head"><h2>Dashboard</h2><span class="view-sub" id="dash-fecha"></span></header>
+                <div class="kpis" id="kpis"></div>
+                <div class="dash-cols">
+                    <div class="panel">
+                        <h3>Últimos pedidos</h3>
+                        <div id="dash-pedidos" class="panel-list"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Últimos cambios de precio</h3>
+                        <div id="dash-cambios" class="panel-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Productos -->
+            <section class="view" id="view-productos" style="display:none">
+                <header class="view-head">
+                    <h2>Productos y precios</h2>
+                    <input type="text" class="buscador" id="prod-buscar" placeholder="Buscar producto o marca…">
+                </header>
+                <div class="chips" id="prod-chips"></div>
+                <div class="tabla-wrap">
+                    <table class="tabla" id="prod-tabla">
+                        <thead><tr>
+                            <th>Producto</th><th>Categoría</th><th class="th-precio">Precio (S/)</th><th>Unidad</th><th>Visible</th><th></th>
+                        </tr></thead>
+                        <tbody id="prod-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Pedidos -->
+            <section class="view" id="view-pedidos" style="display:none">
+                <header class="view-head"><h2>Pedidos</h2><span class="view-sub">Los pedidos llegan cuando un cliente envía su carrito por WhatsApp</span></header>
+                <div id="pedidos-list"></div>
+            </section>
+
+            <!-- Historial -->
+            <section class="view" id="view-historial" style="display:none">
+                <header class="view-head"><h2>Historial de precios</h2></header>
+                <div class="tabla-wrap">
+                    <table class="tabla">
+                        <thead><tr><th>Fecha</th><th>Producto</th><th>Antes</th><th>Después</th><th>Cambiado por</th></tr></thead>
+                        <tbody id="hist-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal edición de producto -->
+    <div class="modal-bg" id="edit-bg" style="display:none">
+        <div class="edit-modal">
+            <div class="edit-head"><h3 id="edit-title">Editar producto</h3><button class="x-btn" id="edit-close">✕</button></div>
+            <div class="edit-grid">
+                <label class="span2">Nombre<input type="text" id="e-nombre"></label>
+                <label>Marca<input type="text" id="e-marca"></label>
+                <label>Categoría<select id="e-categoria"></select></label>
+                <label>Precio (S/)<input type="number" step="0.10" min="0" id="e-precio"></label>
+                <label>Unidad<input type="text" id="e-unidad"></label>
+                <label class="span2">Norma / certificación<input type="text" id="e-norma"></label>
+                <label class="span2">Descripción<textarea id="e-descripcion" rows="3"></textarea></label>
+                <label class="span2">Imagen (ruta o URL)<input type="text" id="e-imagen" placeholder="img/mi-producto.jpg o https://…"></label>
+                <label class="check"><input type="checkbox" id="e-activo"> Visible en la tienda</label>
+            </div>
+            <div class="edit-foot">
+                <button class="btn-ghost" id="edit-cancel">Cancelar</button>
+                <button class="btn-primary" id="edit-save">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="crm.js"></script>
+</body>
+</html>
