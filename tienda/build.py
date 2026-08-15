@@ -46,7 +46,7 @@ def head(titulo, desc, canonical, ogimg, jsonld):
     <link rel="icon" type="image/png" href="/tienda/logo-gasomi.png">
     <link rel="preload" as="image" href="/tienda/logo-gasomi.png" fetchpriority="high">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="/tienda/tienda.min.css?v=9">
+    <link rel="stylesheet" href="/tienda/tienda.min.css?v=10">
     <script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False)}</script>
 </head>'''
 
@@ -100,7 +100,8 @@ COMUNES = '''    <div class="overlay" id="overlay"></div>
                 <span class="total-n" id="total-n">S/ 0.00</span>
             </div>
             <div class="total-nota">Confirmamos stock, tallas y precio final en la proforma.</div>
-            <a class="wa-btn" id="wa-btn" href="https://wa.me/51958682246" target="_blank" rel="noopener">Enviar pedido por WhatsApp</a>
+            <a class="btn-gold btn-block" id="pagar-btn" href="/tienda/pago.html" style="display:none;justify-content:center;margin-bottom:8px">Proceder al pago →</a>
+            <a class="wa-btn wa-sec" id="wa-btn" href="https://wa.me/51958682246" target="_blank" rel="noopener">o pedir por WhatsApp</a>
         </div>
     </aside>
     <div id="modal-root"></div>
@@ -125,11 +126,11 @@ def footer(extra_js=''):
     </footer>
 {COMUNES}
     <script>{extra_js}</script>
-    <script src="/tienda/productos.min.js?v=9" defer></script>
-    <script src="/tienda/app.min.js?v=9" defer></script>
+    <script src="/tienda/productos.min.js?v=10" defer></script>
+    <script src="/tienda/app.min.js?v=10" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>
-    <script src="/tienda/live.min.js?v=9" defer></script>
-    <script src="/tienda/cuenta.min.js?v=9" defer></script>
+    <script src="/tienda/live.min.js?v=10" defer></script>
+    <script src="/tienda/cuenta.min.js?v=10" defer></script>
 </body>
 </html>
 '''

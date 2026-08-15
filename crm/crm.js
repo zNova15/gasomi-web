@@ -14,7 +14,8 @@
     cat: 'todos', q: '', editId: null,
     pedFiltro: 'todos',
     venta: { cliente: '', items: [], q: '' },
-    loginModo: 'ingresar'
+    loginModo: 'ingresar',
+    cliQ: '', cliF: 'todos', config: {}
   };
   var toastTimer = null;
   var rtOn = false;
@@ -50,9 +51,10 @@
   }
   function prodDe(id) { return state.productos.find(function (p) { return p.id === id; }); }
   function clienteDe(uid) { return state.clientes.find(function (c) { return c.user_id === uid; }); }
-  function nombreCliente(uid) {
+  function nombreCliente(uid, p) {
     var c = clienteDe(uid);
-    return c ? (c.nombre || c.empresa || c.email) : 'cliente';
+    if (c) return c.nombre || c.empresa || c.email;
+    return (p && p.cliente_nombre) ? p.cliente_nombre : 'cliente';
   }
   function telWa(c) {
     if (!c || !c.telefono) return null;
@@ -177,6 +179,9 @@
     state.clientes = rcli.data || [];
     state.tareas = rt.data || [];
     if (esAdmin()) {
+      var rcf = await db.from('gasomi_config').select('*');
+      state.config = {};
+      (rcf.data || []).forEach(function (row) { state.config[row.clave] = row.valor; });
       var rh = await db.from('gasomi_precios_historial').select('*, gasomi_productos(nombre)').order('created_at', { ascending: false }).limit(200);
       state.historial = rh.data || [];
       var rco = await db.from('gasomi_costos').select('*');
@@ -227,7 +232,7 @@
   }
 
   /* ================= Render ================= */
-  function render() { renderMiDia(); renderChips(); renderProductos(); renderPedChips(); renderPedidos(); renderClientes(); renderHistorial(); renderEquipo(); renderDeptos(); pintarVenta(); }
+  function render() { renderMiDia(); renderChips(); renderProductos(); renderPedChips(); renderPedidos(); renderClientes(); renderHistorial(); renderEquipo(); renderDeptos(); renderConfig(); pintarVenta(); }
 
   function ventasDe(dia) {
     return state.pedidos.filter(function (p) {
@@ -262,8 +267,8 @@
     badge.textContent = nuevos.length;
 
     $('md-nuevos').innerHTML = nuevos.slice(0, 6).map(function (p) {
-      return '<div class="pl-row"><div class="pl-main">#' + p.id + ' · ' + (p.cliente_id ? esc(nombreCliente(p.cliente_id)) : 'sin cuenta') +
-        '<div class="pl-sub">' + fecha(p.created_at) + ' · ' + (p.items || []).length + ' líneas</div></div>' +
+      return '<div class="pl-row"><div class="pl-main">#' + p.id + ' · ' + esc(nombreCliente(p.cliente_id, p)) + (p.pago_metodo ? ' · ' + esc(p.pago_metodo) : '') +
+        '<div class="pl-sub">' + fecha(p.created_at) + ' · ' + (p.items || []).length + ' líneas' + (p.entrega === 'obra' ? ' · 🚚 obra' : '') + '</div></div>' +
         '<div class="md-acciones"><span class="pl-val">' + fmt(p.total) + '</span>' +
         '<button class="btn-mini-ok" data-atender="' + p.id + '">Atender ✓</button></div></div>';
     }).join('') || '<div class="pl-empty">Nada pendiente. Todo atendido ✓</div>';
@@ -481,7 +486,7 @@
       var items = (p.items || []).map(function (i) {
         return '<div><span>' + i.qty + ' × ' + esc(i.nombre) + (i.mayor ? ' <b class="tag-mayor">por mayor</b>' : '') + '</span><span>' + fmt(i.subtotal) + '</span></div>';
       }).join('');
-      var c = clienteDe(p.cliente_id);
+      var c = clienteDe(p.cliente_id) || (p.cliente_telefono ? { nombre: p.cliente_nombre, telefono: p.cliente_telefono } : null);
       var wa = telWa(c);
       var cli = p.cliente_id
         ? '<span class="pedido-cliente">' + esc(nombreCliente(p.cliente_id)) + (p.puntos_otorgados ? ' · <b class="tag-pts">pts ✓</b>' : '') + '</span>'
@@ -510,6 +515,13 @@
         '<button class="icon-btn" data-nota="' + p.id + '" title="Nota de venta (imprimir/PDF)">🧾</button>' +
         '</div>' +
         (p.nota ? '<div class="pedido-nota">' + esc(p.nota) + '</div>' : '') +
+        ((p.cliente_nombre || p.cliente_telefono || p.direccion) ? '<div class="ped-datos">' +
+          (p.cliente_nombre ? '<span><b>' + esc(p.cliente_nombre) + '</b>' + (p.cliente_empresa ? ' · ' + esc(p.cliente_empresa) : '') + '</span>' : '') +
+          (p.cliente_telefono ? '<span>📱 ' + esc(p.cliente_telefono) + '</span>' : '') +
+          '<span>' + (p.entrega === 'obra' ? '🚚 Obra: ' + esc(p.direccion) : '🏬 Recojo en tienda') + '</span>' +
+          (p.comprobante_tipo === 'factura' ? '<span>🧾 Factura RUC ' + esc(p.cliente_ruc) + '</span>' : '') +
+          (p.comprobante_url ? '<a class="comp-link" href="#" data-comp="' + esc(p.comprobante_url) + '">📎 Ver comprobante</a>' : '') +
+          '</div>' : '') +
         (p.vendedor_email ? '<div class="pl-sub" style="margin-top:6px">Vendedor: ' + esc(p.vendedor_email) + '</div>' : '') +
         waBtns +
         '<div class="pedido-items">' + items + '</div></div>';
@@ -517,19 +529,38 @@
   }
 
   /* ================= Clientes + 360 ================= */
+  function deudaCliente(uid) {
+    return state.pedidos.filter(function (p) { return p.cliente_id === uid && p.estado === 'atendido'; }).reduce(function (a, p) { return a + deudaDe(p); }, 0);
+  }
   function renderClientes() {
-    $('cli-tbody').innerHTML = state.clientes.map(function (c) {
+    var filtros = [['todos', 'Todos'], ['deuda', 'Con deuda'], ['recientes', 'Nuevos (30 días)'], ['top', 'Mejores compradores'], ['dormidos', 'Sin compras 60+ días']];
+    if ($('cli-chips')) $('cli-chips').innerHTML = filtros.map(function (f) { return '<button class="chip' + (state.cliF === f[0] ? ' on' : '') + '" data-clif="' + f[0] + '">' + f[1] + '</button>'; }).join('');
+    var ahora = Date.now();
+    var lista = state.clientes.map(function (c) {
       var peds = state.pedidos.filter(function (p) { return p.cliente_id === c.user_id && p.estado !== 'anulado'; });
-      var totalHist = peds.reduce(function (a, p) { return a + num(p.total); }, 0);
+      var ultimo = peds.length ? Math.max.apply(null, peds.map(function (p) { return new Date(p.created_at).getTime(); })) : 0;
+      return { c: c, peds: peds, total: peds.reduce(function (a, p) { return a + num(p.total); }, 0), deuda: deudaCliente(c.user_id), ultimo: ultimo };
+    }).filter(function (x) {
+      if (state.cliQ && !coincide(x.c.nombre + ' ' + x.c.email + ' ' + x.c.empresa + ' ' + x.c.telefono + ' ' + (x.c.ruc || '') + ' ' + (x.c.etiqueta || ''), state.cliQ)) return false;
+      if (state.cliF === 'deuda') return x.deuda > 0;
+      if (state.cliF === 'recientes') return ahora - new Date(x.c.created_at).getTime() < 30 * 864e5;
+      if (state.cliF === 'dormidos') return x.peds.length && ahora - x.ultimo > 60 * 864e5;
+      return true;
+    });
+    if (state.cliF === 'top') lista.sort(function (a, b) { return b.total - a.total; });
+    $('cli-tbody').innerHTML = lista.map(function (x) {
+      var c = x.c;
+      var etq = c.etiqueta ? '<span class="tag-etq ' + esc(c.etiqueta) + '">' + esc(c.etiqueta) + '</span>' : '';
       return '<tr class="cli-row" data-cli="' + esc(c.user_id) + '">' +
-        '<td><div class="prod-nombre">' + esc(c.nombre || '—') + '</div><div class="pl-sub">' + esc(c.email) + '</div></td>' +
+        '<td><div class="prod-nombre">' + esc(c.nombre || '—') + etq + '</div><div class="pl-sub">' + esc(c.email) + (c.provider === 'google' ? ' · Google' : '') + '</div></td>' +
         '<td>' + esc(c.telefono || '—') + '</td>' +
-        '<td>' + esc(c.empresa || '—') + '</td>' +
+        '<td>' + esc(c.empresa || '—') + (c.ruc ? '<div class="pl-sub">RUC ' + esc(c.ruc) + '</div>' : '') + '</td>' +
         '<td><b class="pts-badge">' + c.puntos + ' pts</b></td>' +
-        '<td>' + peds.length + ' pedidos<div class="pl-sub">' + fmt(totalHist) + '</div></td>' +
+        '<td>' + x.peds.length + ' pedidos<div class="pl-sub">' + fmt(x.total) + '</div></td>' +
+        '<td>' + (x.deuda > 0 ? '<b class="txt-alerta">' + fmt(x.deuda) + '</b>' : '<span class="cat-tag">—</span>') + '</td>' +
         '<td><button class="icon-btn" data-cli-ver="' + esc(c.user_id) + '" title="Ver ficha del cliente">👁</button></td>' +
         '</tr>';
-    }).join('') || '<tr><td colspan="6" style="color:var(--muted)">Todavía no hay clientes registrados.</td></tr>';
+    }).join('') || '<tr><td colspan="7" style="color:var(--muted)">Sin clientes con ese filtro.</td></tr>';
   }
 
   function abrirCliente(uid) {
@@ -554,6 +585,16 @@
       '<button class="btn-ghost btn-mini" data-cli-tarea="' + esc(uid) + '">+ Tarea</button>' +
       (esAdmin() ? '<button class="btn-ghost btn-mini" data-puntos="' + esc(uid) + '">± Puntos</button>' : '') +
       '</div>' +
+      '<h4 class="cli-sub">Datos del cliente</h4>' +
+      '<div class="cli-edit-grid">' +
+      '<label>Nombre<input type="text" id="ce-nombre" value="' + esc(c.nombre) + '"></label>' +
+      '<label>Teléfono<input type="text" id="ce-telefono" value="' + esc(c.telefono) + '"></label>' +
+      '<label>Empresa<input type="text" id="ce-empresa" value="' + esc(c.empresa) + '"></label>' +
+      '<label>RUC<input type="text" id="ce-ruc" value="' + esc(c.ruc || '') + '"></label>' +
+      '<label class="span2">Dirección / obra<input type="text" id="ce-direccion" value="' + esc(c.direccion || '') + '"></label>' +
+      '<label>Etiqueta<select id="ce-etiqueta"><option value="">—</option>' + ['vip', 'constructora', 'nuevo', 'moroso'].map(function (e) { return '<option value="' + e + '"' + (c.etiqueta === e ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select></label>' +
+      '<label class="span2">Notas internas<textarea id="ce-notas" rows="2">' + esc(c.notas || '') + '</textarea></label>' +
+      '<div class="span2"><button class="btn-primary btn-mini" data-cli-guardar="' + esc(uid) + '">Guardar datos</button></div></div>' +
       '<h4 class="cli-sub">Últimos pedidos</h4>' +
       (peds.map(function (p) {
         return '<div class="pl-row"><div class="pl-main">#' + p.id + ' · ' + esc(p.estado) + (deudaDe(p) > 0 && p.estado === 'atendido' ? ' · <b class="txt-alerta">debe ' + fmt(deudaDe(p)) + '</b>' : '') +
@@ -607,6 +648,53 @@
     renderChips(); renderProductos(); renderDeptos(); renderMiDia();
   }
 
+  /* ================= Configuración de pagos/envío ================= */
+  function renderConfig() {
+    if (!esAdmin() || !$('cf-yape-on')) return;
+    var pg = state.config.pagos || {}, ev = state.config.envio || {};
+    var y = pg.yape || {}, pl = pg.plin || {}, tr = pg.transferencia || {}, tj = pg.tarjeta || {}, ce = pg.contra_entrega || {};
+    $('cf-yape-on').checked = y.activo !== false; $('cf-yape-num').value = y.numero || ''; $('cf-yape-tit').value = y.titular || '';
+    $('cf-yape-prev').innerHTML = y.qr ? '<img src="' + esc(y.qr) + '" alt="QR Yape">' : '';
+    $('cf-plin-on').checked = pl.activo !== false; $('cf-plin-num').value = pl.numero || ''; $('cf-plin-tit').value = pl.titular || '';
+    $('cf-plin-prev').innerHTML = pl.qr ? '<img src="' + esc(pl.qr) + '" alt="QR Plin">' : '';
+    $('cf-tr-on').checked = tr.activo !== false; $('cf-tr-banco').value = tr.banco || ''; $('cf-tr-cuenta').value = tr.cuenta || ''; $('cf-tr-cci').value = tr.cci || ''; $('cf-tr-tit').value = tr.titular || '';
+    $('cf-tj-on').checked = !!tj.activo; $('cf-ce-on').checked = ce.activo !== false; $('cf-ce-nota').value = ce.nota || ''; $('cf-wa').value = pg.whatsapp || '';
+    var rc = ev.recojo || {}, ob = ev.obra || {};
+    $('cf-rec-dir').value = rc.direccion || ''; $('cf-rec-hor').value = rc.horario || ''; $('cf-obra-nota').value = ob.nota || ''; $('cf-gratis').value = ev.gratis_desde || '';
+  }
+  async function subirQR(file, nombre) {
+    var path = 'config/qr-' + nombre + '-' + Date.now() + '.jpg';
+    var up = await db.storage.from('gasomi-fotos').upload(path, file, { contentType: file.type || 'image/jpeg', upsert: true });
+    if (up.error) { toast('No se pudo subir el QR', true); return null; }
+    return db.storage.from('gasomi-fotos').getPublicUrl(path).data.publicUrl;
+  }
+  async function guardarConfig() {
+    var pg = state.config.pagos || {}, ev = state.config.envio || {};
+    var y = Object.assign({}, pg.yape || {}), pl = Object.assign({}, pg.plin || {});
+    if ($('cf-yape-qr').files[0]) { var u1 = await subirQR($('cf-yape-qr').files[0], 'yape'); if (u1) y.qr = u1; }
+    if ($('cf-plin-qr').files[0]) { var u2 = await subirQR($('cf-plin-qr').files[0], 'plin'); if (u2) pl.qr = u2; }
+    var nuevoPg = {
+      yape: Object.assign(y, { activo: $('cf-yape-on').checked, numero: $('cf-yape-num').value.trim(), titular: $('cf-yape-tit').value.trim() }),
+      plin: Object.assign(pl, { activo: $('cf-plin-on').checked, numero: $('cf-plin-num').value.trim(), titular: $('cf-plin-tit').value.trim() }),
+      transferencia: { activo: $('cf-tr-on').checked, banco: $('cf-tr-banco').value.trim(), cuenta: $('cf-tr-cuenta').value.trim(), cci: $('cf-tr-cci').value.trim(), titular: $('cf-tr-tit').value.trim() },
+      tarjeta: Object.assign({}, pg.tarjeta || {}, { activo: $('cf-tj-on').checked }),
+      contra_entrega: { activo: $('cf-ce-on').checked, nota: $('cf-ce-nota').value.trim() },
+      whatsapp: $('cf-wa').value.replace(/\D/g, '') || '51958682246'
+    };
+    var nuevoEv = {
+      recojo: { activo: true, direccion: $('cf-rec-dir').value.trim(), horario: $('cf-rec-hor').value.trim() },
+      obra: { activo: true, nota: $('cf-obra-nota').value.trim() },
+      gratis_desde: parseFloat($('cf-gratis').value) || 0
+    };
+    var r1 = await db.from('gasomi_config').upsert({ clave: 'pagos', valor: nuevoPg, updated_at: new Date().toISOString() });
+    var r2 = await db.from('gasomi_config').upsert({ clave: 'envio', valor: nuevoEv, updated_at: new Date().toISOString() });
+    if (r1.error || r2.error) { toast('No se pudo guardar: ' + ((r1.error || r2.error).message), true); return; }
+    state.config.pagos = nuevoPg; state.config.envio = nuevoEv;
+    $('cf-yape-qr').value = ''; $('cf-plin-qr').value = '';
+    renderConfig();
+    toast('Configuración guardada ✓ — la tienda ya la usa');
+  }
+
   /* ================= Historial + Equipo ================= */
   function renderHistorial() {
     if (!esAdmin()) { $('hist-tbody').innerHTML = ''; return; }
@@ -645,13 +733,14 @@
     if (t.dataset && (t.dataset.precio || t.dataset.stock)) t.closest('.precio-edit').classList.add('dirty');
     if (t.id === 'prod-buscar') { state.q = t.value; renderProductos(); }
     if (t.id === 'v-buscar') { state.venta.q = t.value; pintarResultados(); }
+    if (t.id === 'cli-buscar') { state.cliQ = t.value; renderClientes(); }
     if (t.id === 'e-precio' || t.id === 'e-costo') pintarMargen();
     if (t.dataset && t.dataset.escDesde != null) escalasUI[parseInt(t.dataset.escDesde, 10)].desde = t.value;
     if (t.dataset && t.dataset.escPrecio != null) escalasUI[parseInt(t.dataset.escPrecio, 10)].precio = t.value;
   });
 
   document.addEventListener('click', async function (e) {
-    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],[data-nota],[data-est],[data-dep-activa],[data-dep-ver],[data-dep-editar],[data-dep-mostrar],[data-dep-ocultar],[data-dep-solo-stock],[data-esc-del],#dep-add,#e-esc-add,#e-esc-sugerir,#prod-act-todos,#prod-des-todos,#prod-nuevo,#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
+    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],[data-nota],[data-comp],[data-clif],[data-cli-guardar],#cf-guardar,[data-est],[data-dep-activa],[data-dep-ver],[data-dep-editar],[data-dep-mostrar],[data-dep-ocultar],[data-dep-solo-stock],[data-esc-del],#dep-add,#e-esc-add,#e-esc-sugerir,#prod-act-todos,#prod-des-todos,#prod-nuevo,#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
     if (!t) return;
     var d = t.dataset || {};
     if (d.cat) { state.cat = d.cat; renderChips(); renderProductos(); return; }
@@ -776,12 +865,28 @@
       if (rCT.data && rCT.data.length) { state.tareas.push(rCT.data[0]); renderMiDia(); toast('Tarea agregada ✓'); }
       return;
     }
+    if (d.comp) {
+      e.preventDefault();
+      var su = await db.storage.from('gasomi-comprobantes').createSignedUrl(d.comp, 300);
+      if (su.data && su.data.signedUrl) window.open(su.data.signedUrl, '_blank'); else toast('No se pudo abrir el comprobante', true);
+      return;
+    }
     if (d.nota) {
       var pn = state.pedidos.find(function (x) { return x.id === parseInt(d.nota, 10); });
       if (pn) notaVenta(pn);
       return;
     }
     if (d.cliVer) { abrirCliente(d.cliVer); return; }
+    if (d.clif) { state.cliF = d.clif; renderClientes(); return; }
+    if (d.cliGuardar) {
+      var patchC = { nombre: $('ce-nombre').value.trim(), telefono: $('ce-telefono').value.trim(), empresa: $('ce-empresa').value.trim(), ruc: $('ce-ruc').value.trim(), direccion: $('ce-direccion').value.trim(), etiqueta: $('ce-etiqueta').value, notas: $('ce-notas').value.trim() };
+      var rC = await db.from('gasomi_clientes').update(patchC).eq('user_id', d.cliGuardar).select();
+      if (rC.error || !rC.data.length) { toast('No se pudo guardar', true); return; }
+      var iC = state.clientes.findIndex(function (x) { return x.user_id === d.cliGuardar; });
+      if (iC > -1) state.clientes[iC] = rC.data[0];
+      toast('Cliente actualizado ✓'); renderClientes(); $('cli-bg').style.display = 'none';
+      return;
+    }
     if (t.classList && t.classList.contains('cli-row') && !e.target.closest('button')) { abrirCliente(t.dataset.cli); return; }
     if (d.eqActivo) {
       var u = equipo.find(function (x) { return x.email === d.eqActivo; });
@@ -792,6 +897,7 @@
       return;
     }
     if (t.id === 'prod-nuevo') { abrirModal(null); return; }
+    if (t.id === 'cf-guardar') { await guardarConfig(); return; }
     if (t.id === 'eq-add') {
       var em = $('eq-email').value.trim().toLowerCase();
       if (!em || em.indexOf('@') < 1) { toast('Correo inválido', true); return; }

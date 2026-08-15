@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar pedido — Ferretería Gasomi</title>
+    <meta name="description" content="Confirma tu pedido en la Ferretería Gasomi: elige entrega y paga con Yape, Plin, transferencia, tarjeta o contra entrega.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" type="image/png" href="/tienda/logo-gasomi.png">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="/tienda/tienda.min.css?v=10">
+</head>
+<body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="/tienda/" class="brand">
+                <div class="brand-mark"><img src="/tienda/logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L." width="400" height="358"></div>
+                <div>
+                    <div class="brand-name">GASOMI INGENIEROS</div>
+                    <div class="brand-sub">Ferretería · Seguridad Industrial</div>
+                </div>
+            </a>
+            <div class="nav-actions" style="margin-left:auto">
+                <a href="/tienda/" class="nav-link">← Seguir comprando</a>
+                <button class="cuenta-btn" id="cuenta-btn">Mi cuenta</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="contenido" class="pago-page">
+        <div class="pago-steps"><span class="on">1 Datos</span><span class="on">2 Entrega</span><span class="on">3 Pago</span><span>4 Confirmación</span></div>
+        <div class="pago-grid">
+            <div class="pago-form">
+                <section class="pago-sec">
+                    <h2><span class="num">1</span> Tus datos</h2>
+                    <div class="pago-login-hint" id="pago-login-hint">
+                        <span>¿Tienes cuenta? Inicia sesión para usar tus puntos y ver tu pedido después.</span>
+                        <button class="btn-ghost btn-sm" id="pago-login-btn" type="button">Ingresar / Google</button>
+                    </div>
+                    <div class="pago-row">
+                        <label>Nombre completo *<input type="text" id="f-nombre" autocomplete="name" required></label>
+                        <label>WhatsApp *<input type="tel" id="f-telefono" autocomplete="tel" placeholder="9xx xxx xxx" required></label>
+                    </div>
+                    <div class="pago-row">
+                        <label>Correo<input type="email" id="f-email" autocomplete="email" placeholder="para enviarte la confirmación"></label>
+                        <label>Empresa u obra<input type="text" id="f-empresa" autocomplete="organization" placeholder="opcional"></label>
+                    </div>
+                    <div class="pago-row">
+                        <label class="pago-check"><input type="radio" name="comp" value="boleta" checked> Boleta</label>
+                        <label class="pago-check"><input type="radio" name="comp" value="factura"> Factura (RUC)</label>
+                        <label id="ruc-wrap" style="display:none">RUC *<input type="text" id="f-ruc" inputmode="numeric" maxlength="11" placeholder="20xxxxxxxxx"></label>
+                    </div>
+                </section>
+
+                <section class="pago-sec">
+                    <h2><span class="num">2</span> Entrega</h2>
+                    <div class="metodos" id="entrega-tabs">
+                        <button class="metodo on" data-entrega="recojo" type="button"><b>Recojo en tienda</b><small id="ent-recojo-dir">Jr. Puyllucana N° 391, Baños del Inca</small></button>
+                        <button class="metodo" data-entrega="obra" type="button"><b>Entrega en obra</b><small id="ent-obra-nota">Cajamarca y alrededores</small></button>
+                    </div>
+                    <label id="dir-wrap" style="display:none">Dirección de la obra *<input type="text" id="f-direccion" placeholder="Referencia clara para el chofer"></label>
+                </section>
+
+                <section class="pago-sec">
+                    <h2><span class="num">3</span> Método de pago</h2>
+                    <div class="metodos pagos" id="pago-tabs"></div>
+                    <div class="pago-panel" id="pago-panel"></div>
+                </section>
+            </div>
+
+            <aside class="pago-resumen">
+                <h3>Tu pedido</h3>
+                <div id="res-items" class="res-items"></div>
+                <label class="canje-box" id="canje-box"><input type="checkbox" id="canje-check"><span>Canjear mis <b id="canje-pts">0</b> puntos: <b id="canje-desc">−S/ 0.00</b></span></label>
+                <div class="res-lineas">
+                    <div><span>Subtotal</span><span id="res-sub">S/ 0.00</span></div>
+                    <div id="res-desc-row" style="display:none;color:#1a7f42;font-weight:700"><span>Descuento por puntos</span><span id="res-desc">−S/ 0.00</span></div>
+                    <div><span>Envío</span><span id="res-envio">Se confirma por WhatsApp</span></div>
+                    <div class="res-total"><span>Total</span><span id="res-total">S/ 0.00</span></div>
+                </div>
+                <button class="btn-gold btn-block" id="confirmar" type="button">Confirmar pedido</button>
+                <div class="pago-legal">Al confirmar aceptas nuestra <a href="/privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a>. Precios incluyen IGV. El stock y el envío se confirman por WhatsApp.</div>
+                <div class="pago-msg" id="pago-msg"></div>
+            </aside>
+        </div>
+
+        <!-- Confirmación -->
+        <div class="pago-ok" id="pago-ok" style="display:none">
+            <div class="pago-ok-card">
+                <div class="franja"></div>
+                <h2>¡Pedido recibido! <span id="ok-num"></span></h2>
+                <p id="ok-texto"></p>
+                <div id="ok-pago"></div>
+                <div class="ok-acciones">
+                    <a class="wa-btn" id="ok-wa" href="#" target="_blank" rel="noopener">Enviar por WhatsApp a Gasomi</a>
+                    <a class="btn-ghost" href="/tienda/" style="color:var(--primary);border-color:var(--line)">Volver a la tienda</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="cuenta-wrap" id="cuenta-wrap">
+        <div class="overlay on" id="cuenta-overlay"></div>
+        <div class="cuenta-modal">
+            <div class="cuenta-head"><h3 id="cuenta-title">Mi cuenta</h3><button class="x-btn" id="cuenta-close">✕</button></div>
+            <div class="cuenta-body" id="cuenta-body"></div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script src="/tienda/productos.min.js?v=10" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>
+    <script src="/tienda/live.min.js?v=10" defer></script>
+    <script src="/tienda/cuenta.min.js?v=10" defer></script>
+    <script src="/tienda/pago.min.js?v=10" defer></script>
+</body>
+</html>

@@ -274,3 +274,21 @@ input:focus, select:focus, textarea:focus { outline: 2px solid rgba(0, 105, 107,
 .chip-off { text-decoration: line-through; opacity: 0.6; }
 .chip-sep { display: inline-block; width: 1px; height: 22px; background: var(--line); margin: 0 6px; vertical-align: middle; }
 .chip-est { border-style: dashed; }
+.cfg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.cfg-grid label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-top: 8px; }
+.cfg-grid label input[type="text"], .cfg-grid label input[type="number"] { margin-top: 4px; }
+.cfg-grid .check { display: flex; align-items: center; gap: 8px; color: var(--on-surface); font-size: 0.88rem; }
+.cfg-grid .check input { width: auto; }
+.cfg-qr-prev img { width: 90px; height: 90px; object-fit: contain; border: 1px solid var(--line); border-radius: 8px; margin-top: 8px; background: #fff; }
+.tag-etq { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; border-radius: 5px; padding: 2px 7px; margin-left: 6px; }
+.tag-etq.vip { background: #fff3d6; color: #7c5e00; }
+.tag-etq.constructora { background: #e3f0ff; color: #0b4a8f; }
+.tag-etq.moroso { background: #ffe9e0; color: #a34700; }
+.tag-etq.nuevo { background: #e3f6ea; color: #17663a; }
+.cli-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 12px; }
+.cli-edit-grid label { font-size: 0.76rem; font-weight: 600; color: var(--muted); }
+.cli-edit-grid label input, .cli-edit-grid label select, .cli-edit-grid label textarea { margin-top: 4px; }
+.cli-edit-grid .span2 { grid-column: span 2; }
+.comp-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.76rem; font-weight: 700; color: var(--secondary); text-decoration: none; background: rgba(0,137,123,0.08); border-radius: 6px; padding: 3px 9px; }
+.ped-datos { margin-top: 8px; font-size: 0.8rem; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+.ped-datos b { color: var(--on-surface); }

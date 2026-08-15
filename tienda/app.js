@@ -307,7 +307,10 @@
 
     var msg = 'Hola Gasomi, quiero hacer este pedido de EPPs desde la tienda online:\n' + lines.join('\n') +
       '\nTotal referencial: ' + fmt(total) + '\n\nMi obra / empresa: ';
-    document.getElementById('wa-btn').href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
+    var waEl = document.getElementById('wa-btn');
+    if (waEl) waEl.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(msg);
+    var pagarEl = document.getElementById('pagar-btn');
+    if (pagarEl) pagarEl.style.display = ids.length ? 'inline-flex' : 'none';
 
     // datos para el registro del pedido (live.js / cuenta.js)
     window.__gasomiPedidoActual = ids.length ? {

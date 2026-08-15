@@ -153,3 +153,70 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .esc-ahorro { font-size: 0.72rem; color: #1a7f42; font-weight: 700; margin-left: 6px; }
 .mayor-line small { font-weight: 500; color: var(--muted); }
 .d-sig { font-size: 0.68rem; color: #8a6400; margin-top: 2px; }
+/* ---------- Checkout ---------- */
+.wa-sec { background: transparent; color: #17663a; border: 1px solid #bfe9cd; padding: 11px 20px; font-size: 0.86rem; }
+.wa-sec:hover { background: #e9f9ef; color: #17663a; box-shadow: none; transform: none; }
+.pago-page { max-width: var(--maxw); margin: 0 auto; padding: 26px 24px 80px; }
+.pago-steps { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+.pago-steps span { font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; }
+.pago-steps span.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.pago-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 26px; align-items: start; }
+.pago-sec { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 16px; }
+.pago-sec h2 { font-size: 1.05rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.pago-sec .num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent-gold); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 0.82rem; }
+.pago-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-bottom: 10px; }
+.pago-sec label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+.pago-sec label input { width: 100%; margin-top: 5px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 9px; font-size: 0.92rem; font-family: 'Inter', sans-serif; }
+.pago-check { display: flex !important; align-items: center; gap: 8px; font-size: 0.9rem !important; color: var(--on-surface) !important; padding-top: 22px; }
+.pago-check input { width: auto !important; margin: 0 !important; accent-color: var(--secondary); }
+.pago-login-hint { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #fff8e8; border: 1px solid #f4e3b8; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.84rem; color: #6b5518; flex-wrap: wrap; }
+.btn-sm { padding: 8px 14px; font-size: 0.8rem; color: var(--primary); border-color: var(--line); }
+.metodos { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.metodo { display: flex; flex-direction: column; align-items: center; gap: 6px; background: #fff; border: 2px solid var(--line); border-radius: 12px; padding: 14px 10px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s ease; text-align: center; }
+.metodo:hover { border-color: var(--secondary); }
+.metodo.on { border-color: var(--secondary); background: rgba(0, 137, 123, 0.06); }
+.metodo b { font-size: 0.86rem; color: var(--primary); }
+.metodo small { font-size: 0.7rem; color: var(--muted); }
+.metodo img { width: 40px; height: 40px; object-fit: contain; border-radius: 10px; }
+.metodo-ico { font-size: 1.6rem; line-height: 40px; }
+.pago-panel { background: var(--surface-low); border-radius: 12px; padding: 16px 18px; }
+.qr-wrap { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.qr { width: 150px; height: 150px; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--line); }
+.qr-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-weight: 800; color: var(--muted); font-size: 0.9rem; gap: 4px; }
+.qr-ph small { font-weight: 500; font-size: 0.68rem; }
+.qr-num { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1.5rem; letter-spacing: 0.06em; color: var(--primary); }
+.qr-monto { margin-top: 8px; font-size: 0.9rem; }
+.qr-monto b { color: var(--primary); font-family: 'Manrope', sans-serif; font-size: 1.1rem; }
+.comp-box { margin-top: 14px; padding: 12px 14px; background: #fff8e8; border: 1px solid #f4e3b8; border-radius: 10px; font-size: 0.84rem; color: #6b5518; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.comp-btn { display: inline-flex; cursor: pointer; }
+.banco-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.banco-box b { display: block; color: var(--primary); font-family: 'Manrope', sans-serif; }
+.tarjeta-box b { color: var(--primary); }
+.tarjeta-box p { margin-top: 6px; }
+.pago-resumen { position: sticky; top: 86px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; }
+.pago-resumen h3 { font-size: 1.05rem; font-weight: 800; color: var(--primary); margin-bottom: 12px; }
+.res-items { max-height: 320px; overflow-y: auto; margin-bottom: 12px; }
+.res-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--surface-low); }
+.res-item img, .res-ph { width: 44px; height: 44px; object-fit: contain; border-radius: 8px; border: 1px solid var(--line); background: #fff; flex-shrink: 0; }
+.res-info { flex: 1; min-width: 0; }
+.res-nombre { font-size: 0.82rem; font-weight: 600; color: var(--primary); line-height: 1.25; }
+.res-meta { font-size: 0.72rem; color: var(--muted); }
+.res-sub { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.86rem; color: var(--primary); }
+.res-lineas > div { display: flex; justify-content: space-between; font-size: 0.86rem; padding: 4px 0; color: var(--muted); }
+.res-total { border-top: 2px solid var(--primary); margin-top: 6px; padding-top: 8px !important; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 1.15rem !important; color: var(--primary) !important; }
+.pago-resumen .btn-block { justify-content: center; margin-top: 14px; }
+.pago-resumen .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.pago-legal { font-size: 0.72rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+.pago-msg { color: var(--accent-warm); font-size: 0.84rem; font-weight: 600; margin-top: 8px; min-height: 1.2em; }
+.pago-ok { display: flex; justify-content: center; padding: 20px 0; }
+.pago-ok-card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 32px 34px; max-width: 620px; width: 100%; position: relative; overflow: hidden; }
+.pago-ok-card .franja { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--hazard); }
+.pago-ok-card h2 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+.pago-ok-card p { color: var(--muted); }
+.ok-acciones { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+.ok-acciones .wa-btn { width: auto; }
+.o-sep { display: flex; align-items: center; gap: 10px; margin: 12px 0; color: var(--muted); font-size: 0.78rem; }
+.o-sep::before, .o-sep::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.btn-google { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: var(--on-surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 20px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
+.btn-google:hover { border-color: #4285F4; box-shadow: 0 4px 16px rgba(66, 133, 244, 0.18); }
+@media (max-width: 900px) { .pago-grid { grid-template-columns: 1fr; } .pago-resumen { position: static; } .pago-row { grid-template-columns: 1fr; } .pago-check { padding-top: 0; } }

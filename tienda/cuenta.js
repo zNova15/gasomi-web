@@ -23,6 +23,7 @@
   window.__gasomiCanje = function () {
     return { activo: st.canje, puntos: st.cliente ? st.cliente.puntos : 0 };
   };
+  window.__gasomiCliente = function () { return st.cliente; };
 
   /* ---------- Botón del nav + caja de canje en el carrito ---------- */
   function pintarNav() {
@@ -46,10 +47,13 @@
       box.classList.remove('visible');
     }
   };
-  $('canje-check').addEventListener('change', function (e) {
-    st.canje = e.target.checked;
-    if (window.__gasomiRefrescarCarrito) window.__gasomiRefrescarCarrito();
-  });
+  if (!document.getElementById('confirmar')) {
+    // en el catálogo el canje vive aquí; en pago.html lo maneja pago.js
+    $('canje-check').addEventListener('change', function (e) {
+      st.canje = e.target.checked;
+      if (window.__gasomiRefrescarCarrito) window.__gasomiRefrescarCarrito();
+    });
+  }
 
   /* ---------- Modal ---------- */
   function abrir() { $('cuenta-wrap').classList.add('visible'); pintar(); }
@@ -76,6 +80,8 @@
       '<label>Correo<input type="email" id="c-email" autocomplete="username" placeholder="tu@correo.com"></label>' +
       '<label>Contraseña<input type="password" id="c-pass" autocomplete="' + (esLogin ? 'current-password' : 'new-password') + '" placeholder="Mínimo 6 caracteres"></label>' +
       '<button class="btn-gold btn-block" id="c-accion">' + (esLogin ? 'Ingresar' : 'Crear cuenta y ganar 50 puntos') + '</button>' +
+      '<div class="o-sep"><span>o</span></div>' +
+      '<button class="btn-google btn-block" id="c-google" type="button"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.6 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.3l7.8 6C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7A14.5 14.5 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.7-4-13.6-9.7l-7.8 6C6.5 42.6 14.6 48 24 48z"/></svg> Continuar con Google</button>' +
       (esLogin ? '' : '<div class="cuenta-legal">Al crear tu cuenta aceptas nuestra <a href="../privacidad.html" target="_blank" rel="noopener">Política de Privacidad</a> (Ley 29733).</div>') +
       '<div class="cuenta-msg" id="c-msg"></div>';
   }
@@ -108,6 +114,11 @@
     var t = e.target;
     if (t.dataset && t.dataset.vista) { st.vista = t.dataset.vista; pintar(); return; }
     if (t.id === 'c-accion') { st.vista === 'login' ? await login() : await registro(); return; }
+    if (t.id === 'c-google') {
+      var r = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname + location.search } });
+      if (r.error) msg('Google no está disponible en este momento. Usa correo y contraseña.');
+      return;
+    }
     if (t.id === 'c-guardar') { await guardarDatos(); return; }
     if (t.id === 'c-salir') {
       await db.auth.signOut();
@@ -169,20 +180,27 @@
   async function cargarCliente() {
     if (!st.session) return;
     var uid = st.session.user.id;
+    // el personal del CRM no es cliente de la tienda
+    var staff = await db.from('gasomi_crm_usuarios').select('email').eq('email', st.session.user.email).limit(1);
+    if (staff.data && staff.data.length) { st.cliente = null; pintarNav(); return; }
     var r = await db.from('gasomi_clientes').select('*').eq('user_id', uid);
     if (!r.data || !r.data.length) {
       var meta = st.session.user.user_metadata || {};
+      var prov = (st.session.user.app_metadata && st.session.user.app_metadata.provider) || 'email';
       var ins = await db.from('gasomi_clientes').insert({
         user_id: uid,
         email: st.session.user.email,
-        nombre: meta.nombre || '',
+        nombre: meta.nombre || meta.full_name || meta.name || '',
         telefono: meta.telefono || '',
-        empresa: meta.empresa || ''
+        empresa: meta.empresa || '',
+        provider: prov
       }).select();
       st.cliente = ins.data && ins.data.length ? ins.data[0] : null;
+      if (st.cliente && prov === 'google') toast('¡Bienvenido! Ganaste 50 puntos de bienvenida');
     } else {
       st.cliente = r.data[0];
     }
+    if (window.__gasomiOnCliente) window.__gasomiOnCliente();
     var rm = await db.from('gasomi_puntos_movs').select('*').eq('cliente_id', uid).order('created_at', { ascending: false }).limit(10);
     st.movs = rm.data || [];
     var rp = await db.from('gasomi_pedidos').select('id,total,estado,created_at').eq('cliente_id', uid).order('created_at', { ascending: false }).limit(10);
@@ -208,6 +226,10 @@
     try {
       var s = await db.auth.getSession();
       if (s.data.session) { st.session = s.data.session; await cargarCliente(); }
+      // vuelta del OAuth de Google
+      db.auth.onAuthStateChange(function (ev, sess) {
+        if (ev === 'SIGNED_IN' && sess && (!st.session || st.session.user.id !== sess.user.id)) { st.session = sess; cargarCliente(); }
+      });
     } catch (e) {}
   })();
 })();

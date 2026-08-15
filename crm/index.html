@@ -7,7 +7,7 @@
     <meta name="description" content="Panel de administración de la Tienda EPP de Gasomi Ingenieros: productos, precios, pedidos e historial.">
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="../logo-gasomi.png">
-    <link rel="stylesheet" href="crm.css?v=9">
+    <link rel="stylesheet" href="crm.css?v=10">
 </head>
 <body>
     <!-- ===== LOGIN ===== -->
@@ -56,6 +56,7 @@
                 <button class="side-link solo-admin" data-view="deptos">Departamentos</button>
                 <button class="side-link solo-admin" data-view="historial">Historial de precios</button>
                 <button class="side-link solo-admin" data-view="equipo">Equipo</button>
+                <button class="side-link solo-admin" data-view="config">Pagos y envío</button>
             </nav>
             <div class="side-foot">
                 <a href="../tienda/" target="_blank" class="side-tienda">Ver tienda ↗</a>
@@ -174,10 +175,11 @@
 
             <!-- Clientes -->
             <section class="view" id="view-clientes" style="display:none">
-                <header class="view-head"><h2>Clientes y puntos</h2><span class="view-sub">50 pts de bienvenida · 1 pt por cada S/ 10 atendido · 10 pts = S/ 1</span></header>
+                <header class="view-head"><h2>Clientes y puntos</h2><input type="text" class="buscador" id="cli-buscar" placeholder="Buscar por nombre, empresa, teléfono…"></header>
+                <div class="chips" id="cli-chips"></div>
                 <div class="tabla-wrap">
                     <table class="tabla">
-                        <thead><tr><th>Cliente</th><th>Contacto</th><th>Empresa</th><th>Puntos</th><th>Registro</th><th></th></tr></thead>
+                        <thead><tr><th>Cliente</th><th>Contacto</th><th>Empresa / RUC</th><th>Puntos</th><th>Compras</th><th>Deuda</th><th></th></tr></thead>
                         <tbody id="cli-tbody"></tbody>
                     </table>
                 </div>
@@ -195,6 +197,52 @@
                         <button class="btn-primary btn-mini" id="dep-add">Crear</button>
                     </div>
                 </div>
+            </section>
+
+            <!-- Configuración de pagos y envío -->
+            <section class="view" id="view-config" style="display:none">
+                <header class="view-head"><h2>Pagos y envío</h2><span class="view-sub">Lo que ve el cliente al pagar en la tienda. Cambia aquí y se actualiza al instante.</span></header>
+                <div class="cfg-grid">
+                    <div class="panel">
+                        <h3>Yape</h3>
+                        <label class="check"><input type="checkbox" id="cf-yape-on"> Activo</label>
+                        <label>Número<input type="text" id="cf-yape-num" placeholder="958 682 246"></label>
+                        <label>Titular<input type="text" id="cf-yape-tit"></label>
+                        <label>QR (sube imagen)<input type="file" id="cf-yape-qr" accept="image/*"></label>
+                        <div class="cfg-qr-prev" id="cf-yape-prev"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Plin</h3>
+                        <label class="check"><input type="checkbox" id="cf-plin-on"> Activo</label>
+                        <label>Número<input type="text" id="cf-plin-num"></label>
+                        <label>Titular<input type="text" id="cf-plin-tit"></label>
+                        <label>QR (sube imagen)<input type="file" id="cf-plin-qr" accept="image/*"></label>
+                        <div class="cfg-qr-prev" id="cf-plin-prev"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Transferencia</h3>
+                        <label class="check"><input type="checkbox" id="cf-tr-on"> Activo</label>
+                        <label>Banco<input type="text" id="cf-tr-banco" placeholder="BCP"></label>
+                        <label>N° de cuenta<input type="text" id="cf-tr-cuenta"></label>
+                        <label>CCI<input type="text" id="cf-tr-cci"></label>
+                        <label>Titular<input type="text" id="cf-tr-tit"></label>
+                    </div>
+                    <div class="panel">
+                        <h3>Tarjeta y contra entrega</h3>
+                        <label class="check"><input type="checkbox" id="cf-tj-on"> Tarjeta (link de pago por WhatsApp)</label>
+                        <label class="check"><input type="checkbox" id="cf-ce-on"> Contra entrega</label>
+                        <label>Nota contra entrega<input type="text" id="cf-ce-nota"></label>
+                        <label>WhatsApp de pedidos (51…)<input type="text" id="cf-wa"></label>
+                    </div>
+                    <div class="panel">
+                        <h3>Envío y recojo</h3>
+                        <label>Dirección de recojo<input type="text" id="cf-rec-dir"></label>
+                        <label>Horario<input type="text" id="cf-rec-hor"></label>
+                        <label>Nota entrega en obra<input type="text" id="cf-obra-nota"></label>
+                        <label>Envío gratis desde (S/)<input type="number" id="cf-gratis" min="0" step="1"></label>
+                    </div>
+                </div>
+                <div style="margin-top:14px"><button class="btn-primary btn-mini" id="cf-guardar">Guardar configuración</button></div>
             </section>
 
             <!-- Equipo -->
@@ -289,6 +337,6 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
-    <script src="crm.js?v=9"></script>
+    <script src="crm.js?v=10"></script>
 </body>
 </html>
