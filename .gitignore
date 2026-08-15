@@ -1,3 +1,6 @@
 .DS_Store
 .playwright-cli/
 nohup.out
+.venv/
+__pycache__/
+*.tmp

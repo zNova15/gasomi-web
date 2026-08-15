@@ -8,14 +8,19 @@
   var KEY = 'gasomi_epp_cart_v1';
   var TINTS = ['t-gold', 't-teal', 't-warm', 't-steel'];
   var SHORTS = {
-    'proteccion-cabeza': 'Cabeza',
-    'proteccion-visual-facial': 'Visual',
-    'proteccion-auditiva': 'Auditiva',
-    'proteccion-respiratoria': 'Respiratoria',
-    'proteccion-manos': 'Manos',
-    'calzado-seguridad': 'Calzado',
-    'ropa-trabajo': 'Ropa',
-    'altura-senalizacion': 'Altura'
+    'epp': 'EPP',
+    'herramientas-manuales': 'Herramientas',
+    'herramientas-electricas': 'Eléctricas',
+    'tornilleria-fijaciones': 'Tornillería',
+    'gasfiteria': 'Gasfitería',
+    'electricidad': 'Electricidad',
+    'pinturas': 'Pinturas',
+    'construccion': 'Construcción',
+    'cerrajeria': 'Cerrajería',
+    'jardin-exterior': 'Jardín',
+    'adhesivos-quimicos': 'Adhesivos',
+    'escaleras-andamios': 'Escaleras',
+    'limpieza-industrial': 'Limpieza'
   };
 
   var data = window.GASOMI_CATALOGO || { categorias: [], productos: [] };
@@ -30,6 +35,7 @@
 
   var state = {
     cat: (typeof window.__GASOMI_CAT === 'string' ? window.__GASOMI_CAT : 'todos'),
+    sub: 'todas',
     q: '',
     marcas: {},          // {marca: true}
     pmin: null,
@@ -74,9 +80,13 @@
   /* ---------- Filtros ---------- */
   function baseFiltro(p, ignorar) {
     // aplica todos los filtros menos el indicado (para contar opciones)
-    var nq = norm(state.q);
-    if (nq && norm(p.nombre + ' ' + p.marca + ' ' + p.categoria).indexOf(nq) === -1) return false;
+    if (state.q) {
+      var hay = norm(p.nombre + ' ' + p.marca + ' ' + p.categoria + ' ' + (p.subcategoria || ''));
+      var toks = norm(state.q).split(/\s+/).filter(Boolean);
+      for (var ti = 0; ti < toks.length; ti++) { if (hay.indexOf(toks[ti]) === -1) return false; }
+    }
     if (ignorar !== 'cat' && state.cat !== 'todos' && p.categoria !== state.cat) return false;
+    if (ignorar !== 'cat' && ignorar !== 'sub' && state.cat !== 'todos' && state.sub !== 'todas' && (p.subcategoria || '') !== state.sub) return false;
     if (ignorar !== 'marca') {
       var sel = Object.keys(state.marcas);
       if (sel.length && !state.marcas[p.marca]) return false;
@@ -111,14 +121,29 @@
     var marcaCounts = {};
     data.productos.forEach(function (p) { if (baseFiltro(p, 'marca')) marcaCounts[p.marca] = (marcaCounts[p.marca] || 0) + 1; });
     var marcasOrden = Object.keys(marcaCounts).sort(function (a, b) { return marcaCounts[b] - marcaCounts[a] || a.localeCompare(b); });
+    var marcasOrden = marcasOrden.slice(0, state.masMarcas ? 60 : 12);
     var marcas = marcasOrden.map(function (m) {
       return '<label class="f-check"><input type="checkbox" data-fmarca="' + esc(m) + '"' + (state.marcas[m] ? ' checked' : '') + '><span>' + esc(m) + '</span><span class="n">' + marcaCounts[m] + '</span></label>';
     }).join('');
 
+    var subs = '';
+    if (state.cat !== 'todos') {
+      var subCounts = {};
+      data.productos.forEach(function (p) { if (p.categoria === state.cat && baseFiltro(p, 'sub')) subCounts[p.subcategoria || 'Otros'] = (subCounts[p.subcategoria || 'Otros'] || 0) + 1; });
+      var subKeys = Object.keys(subCounts).sort();
+      if (subKeys.length > 1) {
+        subs = '<div class="f-sec"><div class="f-label">Subcategoría</div>' +
+          '<button class="f-cat f-sub' + (state.sub === 'todas' ? ' on' : '') + '" data-fsub="todas"><span>Todas</span></button>' +
+          subKeys.map(function (k) {
+            return '<button class="f-cat f-sub' + (state.sub === k ? ' on' : '') + '" data-fsub="' + esc(k) + '"><span>' + esc(k) + '</span><span class="n">' + subCounts[k] + '</span></button>';
+          }).join('') + '</div>';
+      }
+    }
     el.innerHTML =
       '<div class="f-head"><span class="f-title">Filtros</span><button class="f-clear" id="f-clear">Limpiar todo</button></div>' +
-      '<div class="f-sec"><div class="f-label">Categorías</div>' + cats + '</div>' +
-      '<div class="f-sec"><div class="f-label">Marcas</div>' + marcas + '</div>' +
+      '<div class="f-sec"><div class="f-label">Departamentos</div>' + cats + '</div>' +
+      subs +
+      '<div class="f-sec"><div class="f-label">Marcas</div>' + marcas + (Object.keys(marcaCounts).length > 12 ? '<button class="f-clear" id="f-mas-marcas">' + (state.masMarcas ? 'Ver menos' : 'Ver todas las marcas') + '</button>' : '') + '</div>' +
       '<div class="f-sec"><div class="f-label">Precio (S/)</div><div class="f-precio">' +
       '<input type="number" min="0" placeholder="Mín" id="f-pmin" value="' + (state.pmin != null ? state.pmin : '') + '">' +
       '<span>—</span>' +
@@ -151,11 +176,30 @@
     return '<span class="mayor-line">Por mayor (' + p.mayor_desde + '+): ' + fmt(p.precio_mayor) + '</span>';
   }
 
+  function renderDeptos() {
+    var el = document.getElementById('deptos-grid');
+    if (!el) return;
+    el.innerHTML = data.categorias.map(function (c) {
+      var ps = data.productos.filter(function (p) { return p.categoria === c.slug; });
+      var conFoto = ps.filter(function (p) { return p.imagen; });
+      var foto = conFoto.length ? imgSrc(conFoto[0]) : '';
+      return '<a class="depto-card" href="/tienda/c/' + esc(c.slug) + '/">' +
+        (foto ? '<img src="' + esc(foto) + '" alt="" loading="lazy">' : '<div class="depto-ph">' + esc(c.nombre.charAt(0)) + '</div>') +
+        '<div class="depto-body"><div class="depto-nombre">' + esc(c.nombre) + '</div>' +
+        '<div class="depto-n">' + ps.length + ' productos</div></div></a>';
+    }).join('');
+  }
+
+  var PAGE = 48;
   function renderGrid() {
     if (!document.getElementById('grid')) return;
-    var vis = visibles();
-    document.getElementById('cat-count').textContent = vis.length + ' de ' + data.productos.length + ' productos';
-    document.getElementById('sin-result').style.display = vis.length ? 'none' : 'block';
+    var visAll = visibles();
+    var lim = state.pageLim || PAGE;
+    var vis = visAll.slice(0, lim);
+    document.getElementById('cat-count').textContent = (visAll.length > vis.length ? vis.length + ' de ' : '') + visAll.length + ' productos';
+    document.getElementById('sin-result').style.display = visAll.length ? 'none' : 'block';
+    var masBtn = document.getElementById('ver-mas');
+    if (masBtn) { masBtn.style.display = visAll.length > vis.length ? 'inline-flex' : 'none'; masBtn.textContent = 'Ver más (' + (visAll.length - vis.length) + ' restantes)'; }
     document.getElementById('grid').innerHTML = vis.map(function (p) {
       var s = stockDe(p);
       var boton = s <= 0
@@ -311,11 +355,14 @@
 
   /* ---------- Eventos ---------- */
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-fcat],[data-add],[data-open],[data-inc],[data-dec],[data-del],[data-close],[data-qty],[data-add-modal],#cart-btn,#x-btn,#f-clear,#f-toggle');
+    var t = e.target.closest('[data-fcat],[data-fsub],#f-mas-marcas,#ver-mas,[data-add],[data-open],[data-inc],[data-dec],[data-del],[data-close],[data-qty],[data-add-modal],#cart-btn,#x-btn,#f-clear,#f-toggle');
     if (!t) return;
-    if (t.dataset.fcat) { state.cat = t.dataset.fcat; renderFiltros(); renderGrid(); return; }
+    if (t.dataset.fcat) { state.cat = t.dataset.fcat; state.sub = 'todas'; state.pageLim = PAGE; renderFiltros(); renderGrid(); return; }
+    if (t.dataset.fsub) { state.sub = t.dataset.fsub; state.pageLim = PAGE; renderFiltros(); renderGrid(); return; }
+    if (t.id === 'ver-mas') { state.pageLim = (state.pageLim || PAGE) + PAGE; renderGrid(); return; }
+    if (t.id === 'f-mas-marcas') { state.masMarcas = !state.masMarcas; renderFiltros(); return; }
     if (t.id === 'f-clear') {
-      state.cat = 'todos'; state.marcas = {}; state.pmin = null; state.pmax = null; state.soloStock = false; state.q = '';
+      state.cat = 'todos'; state.sub = 'todas'; state.marcas = {}; state.pmin = null; state.pmax = null; state.soloStock = false; state.q = '';
       document.getElementById('buscar').value = '';
       renderFiltros(); renderGrid(); return;
     }
@@ -374,6 +421,8 @@
   var buscarEl = document.getElementById('buscar');
   if (buscarEl) buscarEl.addEventListener('input', function (e) {
     state.q = e.target.value;
+    state.pageLim = PAGE;
+    if (state.q && !window.__GASOMI_CAT) { state.cat = 'todos'; state.sub = 'todas'; }
     renderFiltros();
     renderGrid();
   });
@@ -393,7 +442,7 @@
     var s0 = stockDe(p);
     if (el('p-nombre')) {
       el('p-nombre').textContent = p.nombre;
-      document.title = p.nombre + ' — Tienda EPP Gasomi';
+      document.title = p.nombre + ' — Ferretería Gasomi';
     }
     if (el('p-marca')) el('p-marca').textContent = p.marca;
     if (el('p-desc')) el('p-desc').textContent = p.descripcion;
@@ -429,6 +478,7 @@
     if (el('m-qty')) el('m-qty').textContent = state.qty;
   }
 
+  renderDeptos();
   renderFiltros();
   renderGrid();
   renderCart();
@@ -440,7 +490,7 @@
     if (prods && prods.length) data.productos = prods;
     rebuild();
     if (state.modal && !byId[state.modal]) state.modal = null;
-    renderFiltros(); renderGrid(); renderCart(); renderModal(); renderProducto();
+    renderDeptos(); renderFiltros(); renderGrid(); renderCart(); renderModal(); renderProducto();
   };
   // Hook para cuenta.js: re-render del carrito al activar canje o cambiar puntos
   window.__gasomiRefrescarCarrito = renderCart;

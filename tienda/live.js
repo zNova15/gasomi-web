@@ -11,7 +11,7 @@
 
   function map(r) {
     return {
-      id: r.id, nombre: r.nombre, categoria: r.categoria, marca: r.marca,
+      id: r.id, nombre: r.nombre, categoria: r.categoria, subcategoria: r.subcategoria || '', marca: r.marca,
       descripcion: r.descripcion, norma: r.norma,
       precio: parseFloat(r.precio),
       precio_mayor: parseFloat(r.precio_mayor || 0),
@@ -24,7 +24,7 @@
   async function cargar() {
     try {
       var rc = await db.from('gasomi_categorias').select('*').order('orden');
-      var rp = await db.from('gasomi_productos').select('*').eq('activo', true).order('orden');
+      var rp = await db.from('gasomi_productos').select('*').eq('activo', true).order('orden').range(0, 4999);
       if (rp.data && rp.data.length && window.__gasomiApply) {
         window.__gasomiApply(rc.data || null, rp.data.map(map));
       }

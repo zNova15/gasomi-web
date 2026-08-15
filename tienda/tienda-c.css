@@ -132,3 +132,15 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .cat-intro h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: var(--primary); }
 .cat-intro p { color: var(--muted); max-width: 640px; margin-top: 8px; }
 @media (max-width: 800px) { .prod-grid { grid-template-columns: 1fr; } .p-visual { min-height: 260px; } }
+/* ---------- Ferretería: departamentos + paginación + subcategorías ---------- */
+.deptos { padding: 56px 0 8px; }
+.deptos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.depto-card { display: flex; flex-direction: column; background: var(--surface-high); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; text-decoration: none; transition: all 0.25s cubic-bezier(0.2, 0.6, 0.2, 1); }
+.depto-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-med); border-color: transparent; }
+.depto-card img { width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #fff; padding: 12px; }
+.depto-ph { width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 2rem; color: rgba(0,10,30,0.15); background: repeating-linear-gradient(-45deg, #f4f7f9 0 12px, #eef2f5 12px 24px); }
+.depto-body { padding: 10px 12px 12px; }
+.depto-nombre { font-family: 'Manrope', sans-serif; font-weight: 800; font-size: 0.84rem; color: var(--primary); line-height: 1.25; }
+.depto-n { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+.ver-mas-wrap { display: flex; justify-content: center; margin-top: 28px; }
+.f-sub { padding: 6px 10px 6px 18px; font-size: 0.82rem; font-weight: 500; }

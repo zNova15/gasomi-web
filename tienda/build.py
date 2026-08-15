@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generador de páginas estáticas de la Tienda EPP Gasomi.
+"""Generador de páginas estáticas de la Ferretería Gasomi (EPP + ferretería completa).
 
 Lee productos.js y genera:
   - p/<id>/index.html   (ficha de cada producto, con JSON-LD Product)
@@ -46,7 +46,7 @@ def head(titulo, desc, canonical, ogimg, jsonld):
     <link rel="icon" type="image/png" href="/tienda/logo-gasomi.png">
     <link rel="preload" as="image" href="/tienda/logo-gasomi.png" fetchpriority="high">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="/tienda/tienda.min.css?v=7">
+    <link rel="stylesheet" href="/tienda/tienda.min.css?v=8">
     <script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False)}</script>
 </head>'''
 
@@ -65,7 +65,7 @@ NAV = '''<body>
                 <div class="brand-mark"><img src="/tienda/logo-gasomi.png" alt="Logo Gasomi Ingenieros E.I.R.L." width="400" height="358" fetchpriority="high"></div>
                 <div>
                     <div class="brand-name">GASOMI INGENIEROS</div>
-                    <div class="brand-sub">Tienda de Seguridad Industrial · EPP</div>
+                    <div class="brand-sub">Ferretería · Seguridad Industrial</div>
                 </div>
             </a>
             <div class="nav-actions" style="margin-left:auto">
@@ -125,17 +125,17 @@ def footer(extra_js=''):
     </footer>
 {COMUNES}
     <script>{extra_js}</script>
-    <script src="/tienda/productos.min.js?v=7" defer></script>
-    <script src="/tienda/app.min.js?v=7" defer></script>
+    <script src="/tienda/productos.min.js?v=8" defer></script>
+    <script src="/tienda/app.min.js?v=8" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>
-    <script src="/tienda/live.min.js?v=7" defer></script>
-    <script src="/tienda/cuenta.min.js?v=7" defer></script>
+    <script src="/tienda/live.min.js?v=8" defer></script>
+    <script src="/tienda/cuenta.min.js?v=8" defer></script>
 </body>
 </html>
 '''
 
 def crumbs(items):
-    partes = ['<a href="/tienda/">Tienda EPP</a>']
+    partes = ['<a href="/tienda/">Ferretería</a>']
     for texto, url in items:
         partes.append('<span class="sep">›</span>')
         partes.append(f'<a href="{url}">{esc(texto)}</a>' if url else f'<span>{esc(texto)}</span>')
@@ -146,7 +146,7 @@ for p in PRODUCTOS:
     cat = CATS[p['categoria']]
     url = f'{BASE}/tienda/p/{p["id"]}/'
     img_abs = f'{BASE}/tienda/{p["imagen"]}' if p.get('imagen') else f'{BASE}/og-gasomi.jpg'
-    titulo = trim(f'{p["nombre"]} — Tienda EPP Gasomi', 60)
+    titulo = trim(f'{p["nombre"]} — Ferretería Gasomi', 60)
     desc = trim(f'{p["descripcion"]} Precio referencial S/ {precio(p):.2f} ({p["unidad"]}). Entrega en obra en Cajamarca.', 158)
 
     jsonld = [{
@@ -169,7 +169,7 @@ for p in PRODUCTOS:
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Tienda EPP", "item": f"{BASE}/tienda/"},
+            {"@type": "ListItem", "position": 1, "name": "Ferretería", "item": f"{BASE}/tienda/"},
             {"@type": "ListItem", "position": 2, "name": cat['nombre'], "item": f"{BASE}/tienda/c/{cat['slug']}/"},
             {"@type": "ListItem", "position": 3, "name": p['nombre'], "item": url}
         ]
@@ -237,7 +237,7 @@ for cat in data['categorias']:
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         "itemListElement": [
-            {"@type": "ListItem", "position": 1, "name": "Tienda EPP", "item": f"{BASE}/tienda/"},
+            {"@type": "ListItem", "position": 1, "name": "Ferretería", "item": f"{BASE}/tienda/"},
             {"@type": "ListItem", "position": 2, "name": cat['nombre'], "item": url}
         ]
     }]
@@ -270,6 +270,7 @@ for cat in data['categorias']:
                             </select>
                         </div>
                         <div class="grid" id="grid"></div>
+                        <div class="ver-mas-wrap"><button class="btn-gold" id="ver-mas" style="display:none">Ver más</button></div>
                         <div class="sin-result" id="sin-result" style="display:none">No encontramos productos con esos filtros. Escríbenos por WhatsApp y lo conseguimos.</div>
                     </div>
                 </div>
