@@ -16,6 +16,7 @@
       precio: parseFloat(r.precio),
       precio_mayor: parseFloat(r.precio_mayor || 0),
       mayor_desde: parseInt(r.mayor_desde || 12, 10),
+      escalas: Array.isArray(r.escalas) ? r.escalas : [],
       stock: parseInt(r.stock != null ? r.stock : 99, 10),
       unidad: r.unidad, imagen: r.imagen || ''
     };
@@ -36,6 +37,7 @@
   // Realtime: precios y stock cambian en la tienda al instante (ediciones del CRM y pedidos de otros clientes)
   db.channel('gasomi-productos')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'gasomi_productos' }, function () { cargar(); })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'gasomi_categorias' }, function () { cargar(); })
     .subscribe();
 
   // Registrar el pedido en el CRM cuando el cliente lo envía por WhatsApp.

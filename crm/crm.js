@@ -68,9 +68,27 @@
   function slugify(t) {
     return normTxt(t).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 48) || 'producto';
   }
+  function escalasDe(p) {
+    var e = Array.isArray(p.escalas) ? p.escalas : [];
+    e = e.filter(function (t) { return t && num(t.desde) > 1 && num(t.precio) > 0 && num(t.precio) < num(p.precio); })
+      .map(function (t) { return { desde: parseInt(t.desde, 10), precio: num(t.precio) }; })
+      .sort(function (a, b) { return a.desde - b.desde; });
+    if (!e.length && num(p.precio_mayor) > 0 && num(p.precio_mayor) < num(p.precio)) e = [{ desde: p.mayor_desde || 12, precio: num(p.precio_mayor) }];
+    return e;
+  }
   function precioAplicado(p, qty) {
-    var pm = num(p.precio_mayor);
-    return (pm > 0 && pm < num(p.precio) && qty >= p.mayor_desde) ? pm : num(p.precio);
+    var e = escalasDe(p), pr = num(p.precio);
+    for (var i = 0; i < e.length; i++) { if (qty >= e[i].desde) pr = e[i].precio; }
+    return pr;
+  }
+  function sugerirEscalas(precio) {
+    precio = num(precio);
+    if (precio <= 0) return [];
+    var r = function (x) { return Math.round(x * 100) / 100; };
+    if (precio < 5) return [{ desde: 50, precio: r(precio * 0.90) }, { desde: 100, precio: r(precio * 0.85) }, { desde: 300, precio: r(precio * 0.80) }];
+    if (precio < 30) return [{ desde: 12, precio: r(precio * 0.92) }, { desde: 50, precio: r(precio * 0.88) }, { desde: 100, precio: r(precio * 0.84) }];
+    if (precio < 150) return [{ desde: 6, precio: r(precio * 0.93) }, { desde: 12, precio: r(precio * 0.90) }, { desde: 50, precio: r(precio * 0.86) }];
+    return [{ desde: 3, precio: r(precio * 0.95) }, { desde: 6, precio: r(precio * 0.92) }, { desde: 12, precio: r(precio * 0.88) }];
   }
   function deudaDe(p) {
     return Math.max(0, num(p.total) - num(p.monto_pagado));
@@ -209,7 +227,7 @@
   }
 
   /* ================= Render ================= */
-  function render() { renderMiDia(); renderChips(); renderProductos(); renderPedChips(); renderPedidos(); renderClientes(); renderHistorial(); renderEquipo(); pintarVenta(); }
+  function render() { renderMiDia(); renderChips(); renderProductos(); renderPedChips(); renderPedidos(); renderClientes(); renderHistorial(); renderEquipo(); renderDeptos(); pintarVenta(); }
 
   function ventasDe(dia) {
     return state.pedidos.filter(function (p) {
@@ -327,6 +345,8 @@
       var esMayor = pu < num(p.precio);
       var hist = ultimoPrecioDe(state.venta.cliente, it.id);
       var hint = (hist != null && Math.abs(hist - pu) > 0.005) ? '<div class="v-hint">Última vez a este cliente: ' + fmt(hist) + '</div>' : '';
+      var sig = escalasDe(p).filter(function (t) { return t.desde > it.qty; })[0];
+      if (sig) hint += '<div class="v-hint" style="background:#e9f9ef;color:#17663a">Con ' + sig.desde + '+ baja a ' + fmt(sig.precio) + ' c/u</div>';
       return '<div class="t-item"><div class="t-info"><div class="t-nombre">' + esc(p.nombre) + '</div>' +
         '<div class="t-meta">' + fmt(pu) + (esMayor ? ' <b class="tag-mayor">por mayor</b>' : '') + (it.qty > p.stock ? ' <b class="txt-alerta">¡solo hay ' + p.stock + '!</b>' : '') + '</div>' + hint + '</div>' +
         '<div class="step"><button data-v-dec="' + esc(it.id) + '">−</button><span>' + it.qty + '</span><button data-v-inc="' + esc(it.id) + '">+</button></div>' +
@@ -385,8 +405,12 @@
   /* ================= Productos ================= */
   function renderChips() {
     var cats = [{ slug: 'todos', nombre: 'Todos' }].concat(state.categorias);
+    var est = [['todos', 'Todos los estados'], ['visibles', 'Visibles'], ['ocultos', 'Ocultos'], ['sinstock', 'Sin stock']];
     $('prod-chips').innerHTML = cats.map(function (c) {
-      return '<button class="chip' + (state.cat === c.slug ? ' on' : '') + '" data-cat="' + esc(c.slug) + '">' + esc(c.nombre) + '</button>';
+      var n = c.slug === 'todos' ? state.productos.length : state.productos.filter(function (p) { return p.categoria === c.slug; }).length;
+      return '<button class="chip' + (state.cat === c.slug ? ' on' : '') + (c.activa === false ? ' chip-off' : '') + '" data-cat="' + esc(c.slug) + '">' + esc(c.nombre) + ' <span class="chip-n">' + n + '</span></button>';
+    }).join('') + '<span class="chip-sep"></span>' + est.map(function (e) {
+      return '<button class="chip chip-est' + ((state.estadoF || 'todos') === e[0] ? ' on' : '') + '" data-est="' + e[0] + '">' + e[1] + '</button>';
     }).join('');
   }
   function catNombre(slug) {
@@ -397,9 +421,14 @@
     var admin = esAdmin();
     var vis = state.productos.filter(function (p) {
       if (state.cat !== 'todos' && p.categoria !== state.cat) return false;
+      if (state.estadoF === 'visibles' && !p.activo) return false;
+      if (state.estadoF === 'ocultos' && p.activo) return false;
+      if (state.estadoF === 'sinstock' && p.stock > 0) return false;
       if (state.q && !coincide(p.nombre + ' ' + p.marca + ' ' + (p.subcategoria || ''), state.q)) return false;
       return true;
     });
+    state.visiblesIds = vis.map(function (p) { return p.id; });
+    if ($('prod-masivo-txt')) $('prod-masivo-txt').textContent = vis.length + ' productos en este filtro · ' + vis.filter(function (p) { return p.activo; }).length + ' visibles en la tienda';
     $('prod-tbody').innerHTML = vis.map(function (p) {
       var thumb = p.imagen
         ? '<img class="prod-thumb" src="' + esc(thumbSrc(p)) + '" onerror="this.style.display=\'none\'" alt="">'
@@ -409,8 +438,9 @@
         var m = ((num(p.precio) - state.costos[p.id]) / num(p.precio)) * 100;
         margen = '<div class="margen-chip' + (m < 15 ? ' bajo' : '') + '">margen ' + m.toFixed(0) + '%</div>';
       }
-      var mayor = num(p.precio_mayor) > 0
-        ? fmt(p.precio_mayor) + '<div class="pl-sub">desde ' + p.mayor_desde + ' und.</div>'
+      var esc0 = escalasDe(p);
+      var mayor = esc0.length
+        ? esc0.map(function (t) { return '<div class="pl-sub" style="color:var(--on-surface)"><b>' + t.desde + '+</b> ' + fmt(t.precio) + '</div>'; }).join('')
         : '<span class="cat-tag">—</span>';
       var stockCls = p.stock <= 0 ? ' stock-cero' : (p.stock <= 5 ? ' stock-bajo' : '');
       var precioCell = admin
@@ -534,6 +564,49 @@
   $('cli-close').addEventListener('click', function () { $('cli-bg').style.display = 'none'; });
   $('cli-bg').addEventListener('click', function (e) { if (e.target === $('cli-bg')) $('cli-bg').style.display = 'none'; });
 
+  /* ================= Departamentos ================= */
+  function renderDeptos() {
+    var el = $('deptos-crm');
+    if (!el || !esAdmin()) return;
+    el.innerHTML = state.categorias.map(function (c) {
+      var ps = state.productos.filter(function (p) { return p.categoria === c.slug; });
+      var act = ps.filter(function (p) { return p.activo; }).length;
+      var conStock = ps.filter(function (p) { return p.stock > 0; }).length;
+      var foto = c.imagen || (ps.filter(function (p) { return p.imagen; })[0] || {}).imagen || '';
+      var img = foto ? '<img src="' + esc(foto.indexOf('http') === 0 ? foto : '../tienda/' + foto) + '" alt="">' : '<div class="prod-thumb-ph">' + esc(c.nombre.charAt(0)) + '</div>';
+      return '<div class="dep-card' + (c.activa === false ? ' off' : '') + '">' +
+        '<div class="dep-top">' + img + '<div style="flex:1"><div class="dep-nombre">' + esc(c.nombre) + '</div>' +
+        '<div class="dep-n">' + ps.length + ' productos · ' + act + ' visibles · ' + conStock + ' con stock</div></div>' +
+        '<button class="switch' + (c.activa !== false ? ' on' : '') + '" data-dep-activa="' + esc(c.slug) + '" title="Mostrar u ocultar el departamento en la tienda"></button></div>' +
+        '<div class="dep-acciones">' +
+        '<button class="btn-ghost" data-dep-ver="' + esc(c.slug) + '">Ver productos</button>' +
+        '<button class="btn-ghost" data-dep-editar="' + esc(c.slug) + '">Editar</button>' +
+        '<button class="btn-ghost" data-dep-mostrar="' + esc(c.slug) + '">Mostrar todos</button>' +
+        '<button class="btn-ghost" data-dep-ocultar="' + esc(c.slug) + '">Ocultar todos</button>' +
+        '<button class="btn-ghost" data-dep-solo-stock="' + esc(c.slug) + '" title="Muestra solo los que tienen stock y oculta el resto">Solo con stock</button>' +
+        '</div></div>';
+    }).join('');
+  }
+  async function updateCategoria(slug, patch, okMsg) {
+    var r = await db.from('gasomi_categorias').update(patch).eq('slug', slug).select();
+    if (r.error || !r.data || !r.data.length) { toast('No se pudo guardar: ' + (r.error ? r.error.message : 'sin permisos'), true); return false; }
+    var i = state.categorias.findIndex(function (c) { return c.slug === slug; });
+    if (i > -1) state.categorias[i] = r.data[0];
+    toast(okMsg || 'Guardado ✓');
+    return true;
+  }
+  async function masivoActivo(ids, activo, msg) {
+    if (!ids.length) { toast('No hay productos en ese filtro', true); return; }
+    if (!confirm((activo ? 'Mostrar' : 'Ocultar') + ' ' + ids.length + ' productos en la tienda?')) return;
+    for (var k = 0; k < ids.length; k += 100) {
+      var r = await db.from('gasomi_productos').update({ activo: activo }).in('id', ids.slice(k, k + 100));
+      if (r.error) { toast('Error: ' + r.error.message, true); return; }
+    }
+    state.productos.forEach(function (p) { if (ids.indexOf(p.id) > -1) p.activo = activo; });
+    toast(msg || ('Listo: ' + ids.length + ' productos ' + (activo ? 'visibles' : 'ocultos')));
+    renderChips(); renderProductos(); renderDeptos(); renderMiDia();
+  }
+
   /* ================= Historial + Equipo ================= */
   function renderHistorial() {
     if (!esAdmin()) { $('hist-tbody').innerHTML = ''; return; }
@@ -573,13 +646,58 @@
     if (t.id === 'prod-buscar') { state.q = t.value; renderProductos(); }
     if (t.id === 'v-buscar') { state.venta.q = t.value; pintarResultados(); }
     if (t.id === 'e-precio' || t.id === 'e-costo') pintarMargen();
+    if (t.dataset && t.dataset.escDesde != null) escalasUI[parseInt(t.dataset.escDesde, 10)].desde = t.value;
+    if (t.dataset && t.dataset.escPrecio != null) escalasUI[parseInt(t.dataset.escPrecio, 10)].precio = t.value;
   });
 
   document.addEventListener('click', async function (e) {
-    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],[data-nota],#prod-nuevo,#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
+    var t = e.target.closest('[data-cat],[data-save],[data-save-stock],[data-activo],[data-edit],[data-puntos],[data-pedf],[data-atender],[data-tarea-ok],[data-v-add],[data-v-inc],[data-v-dec],[data-v-del],[data-cli-ver],[data-cli-venta],[data-cli-repetir],[data-cli-tarea],[data-eq-activo],[data-nota],[data-est],[data-dep-activa],[data-dep-ver],[data-dep-editar],[data-dep-mostrar],[data-dep-ocultar],[data-dep-solo-stock],[data-esc-del],#dep-add,#e-esc-add,#e-esc-sugerir,#prod-act-todos,#prod-des-todos,#prod-nuevo,#tarea-btn,#v-registrar,#v-repetir,#eq-add,.cli-row');
     if (!t) return;
     var d = t.dataset || {};
     if (d.cat) { state.cat = d.cat; renderChips(); renderProductos(); return; }
+    if (d.est) { state.estadoF = d.est; renderChips(); renderProductos(); return; }
+    if (t.id === 'prod-act-todos') { await masivoActivo(state.visiblesIds || [], true); return; }
+    if (t.id === 'prod-des-todos') { await masivoActivo(state.visiblesIds || [], false); return; }
+    if (d.depActiva) {
+      var cA = state.categorias.find(function (x) { return x.slug === d.depActiva; });
+      if (await updateCategoria(cA.slug, { activa: cA.activa === false }, cA.activa === false ? 'Departamento visible en la tienda ✓' : 'Departamento oculto en la tienda')) renderDeptos();
+      return;
+    }
+    if (d.depVer) { state.cat = d.depVer; state.estadoF = 'todos'; irA('productos'); renderChips(); renderProductos(); return; }
+    if (d.depMostrar) { await masivoActivo(state.productos.filter(function (p) { return p.categoria === d.depMostrar; }).map(function (p) { return p.id; }), true); return; }
+    if (d.depOcultar) { await masivoActivo(state.productos.filter(function (p) { return p.categoria === d.depOcultar; }).map(function (p) { return p.id; }), false); return; }
+    if (d.depSoloStock) {
+      var con = state.productos.filter(function (p) { return p.categoria === d.depSoloStock && p.stock > 0; }).map(function (p) { return p.id; });
+      var sin = state.productos.filter(function (p) { return p.categoria === d.depSoloStock && p.stock <= 0; }).map(function (p) { return p.id; });
+      if (!confirm('Mostrar ' + con.length + ' con stock y ocultar ' + sin.length + ' sin stock?')) return;
+      for (var k1 = 0; k1 < con.length; k1 += 100) await db.from('gasomi_productos').update({ activo: true }).in('id', con.slice(k1, k1 + 100));
+      for (var k2 = 0; k2 < sin.length; k2 += 100) await db.from('gasomi_productos').update({ activo: false }).in('id', sin.slice(k2, k2 + 100));
+      state.productos.forEach(function (p) { if (p.categoria === d.depSoloStock) p.activo = p.stock > 0; });
+      toast('Listo ✓'); renderChips(); renderProductos(); renderDeptos(); renderMiDia();
+      return;
+    }
+    if (d.depEditar) {
+      var cE = state.categorias.find(function (x) { return x.slug === d.depEditar; });
+      var nn = prompt('Nombre del departamento:', cE.nombre); if (nn == null) return;
+      var nd = prompt('Descripción corta:', cE.descripcion); if (nd == null) return;
+      var ni = prompt('Foto (URL o ruta img/…, vacío = automática):', cE.imagen || ''); if (ni == null) return;
+      if (await updateCategoria(cE.slug, { nombre: nn.trim() || cE.nombre, descripcion: nd.trim(), imagen: ni.trim() }, 'Departamento actualizado ✓')) { renderDeptos(); renderChips(); }
+      return;
+    }
+    if (t.id === 'dep-add') {
+      var nom = $('dep-nombre').value.trim();
+      if (!nom) { toast('Ponle nombre', true); return; }
+      var slugN = slugify(nom);
+      var rD = await db.from('gasomi_categorias').insert({ slug: slugN, nombre: nom, descripcion: $('dep-desc').value.trim(), orden: state.categorias.length + 1 }).select();
+      if (rD.error) { toast(rD.error.message.indexOf('duplicate') > -1 ? 'Ya existe un departamento así' : 'No se pudo crear', true); return; }
+      state.categorias.push(rD.data[0]);
+      $('dep-nombre').value = ''; $('dep-desc').value = '';
+      toast('Departamento creado ✓ — ya puedes asignarle productos'); renderDeptos(); renderChips();
+      return;
+    }
+    if (t.id === 'e-esc-add') { escalasUI.push({ desde: '', precio: '' }); pintarEscalas(); return; }
+    if (t.id === 'e-esc-sugerir') { escalasUI = sugerirEscalas($('e-precio').value); pintarEscalas(); if (!escalasUI.length) toast('Pon primero el precio unitario', true); return; }
+    if (d.escDel != null) { escalasUI.splice(parseInt(d.escDel, 10), 1); pintarEscalas(); return; }
     if (d.pedf) { state.pedFiltro = d.pedf; renderPedChips(); renderPedidos(); return; }
     if (d.save) {
       var input = document.querySelector('input[data-precio="' + d.save + '"]');
@@ -805,6 +923,21 @@
       el.style.color = 'var(--muted)';
     }
   }
+  var escalasUI = [];
+  function pintarEscalas() {
+    var el = $('e-escalas');
+    if (!el) return;
+    el.innerHTML = escalasUI.map(function (t, i) {
+      return '<div class="esc-row"><span>Desde</span><input type="number" min="2" step="1" value="' + esc(t.desde) + '" data-esc-desde="' + i + '" placeholder="12">' +
+        '<span>unidades →</span><input type="number" min="0" step="0.01" value="' + esc(t.precio) + '" data-esc-precio="' + i + '" placeholder="precio c/u">' +
+        '<button class="d-x" data-esc-del="' + i + '" title="Quitar tramo">✕</button></div>';
+    }).join('') || '<div class="pl-sub">Sin precio por mayor. Usa ✨ Sugerir o + Tramo.</div>';
+  }
+  function leerEscalas() {
+    return escalasUI.map(function (t) { return { desde: parseInt(t.desde, 10), precio: Math.round(num(t.precio) * 100) / 100 }; })
+      .filter(function (t) { return t.desde > 1 && t.precio > 0; })
+      .sort(function (a, b) { return a.desde - b.desde; });
+  }
   function pintarSubcatsList() {
     var dl = $('subcats-list');
     if (!dl) return;
@@ -831,8 +964,7 @@
       pintarSubcatsList();
       $('e-precio').value = '';
       $('e-costo').value = '';
-      $('e-precio-mayor').value = '0';
-      $('e-mayor-desde').value = '12';
+      escalasUI = []; pintarEscalas();
       $('e-stock').value = '10';
       $('e-unidad').value = 'unidad';
       $('e-norma').value = '';
@@ -857,8 +989,8 @@
     pintarSubcatsList();
     $('e-precio').value = num(p.precio).toFixed(2);
     $('e-costo').value = (state.costos[p.id] || 0).toFixed(2);
-    $('e-precio-mayor').value = num(p.precio_mayor).toFixed(2);
-    $('e-mayor-desde').value = p.mayor_desde;
+    escalasUI = escalasDe(p).map(function (t) { return { desde: t.desde, precio: t.precio }; });
+    pintarEscalas();
     $('e-stock').value = p.stock;
     $('e-unidad').value = p.unidad;
     $('e-norma').value = p.norma;
@@ -877,14 +1009,18 @@
     var val = parseFloat($('e-precio').value);
     if (isNaN(val) || val < 0) { toast('Precio inválido', true); return; }
     var esNuevo = state.editId == null;
+    var escV = leerEscalas();
+    for (var ei = 0; ei < escV.length; ei++) {
+      if (escV[ei].precio >= val) { toast('El precio por mayor desde ' + escV[ei].desde + ' debe ser menor al precio unitario', true); return; }
+      if (ei > 0 && escV[ei].precio >= escV[ei - 1].precio) { toast('A más cantidad, el precio debe bajar (revisa el tramo desde ' + escV[ei].desde + ')', true); return; }
+    }
     var patch = {
       nombre: $('e-nombre').value.trim(),
       marca: $('e-marca').value.trim(),
       categoria: $('e-categoria').value,
       subcategoria: $('e-subcategoria').value.trim(),
       precio: val,
-      precio_mayor: parseFloat($('e-precio-mayor').value) || 0,
-      mayor_desde: Math.max(2, parseInt($('e-mayor-desde').value, 10) || 12),
+      escalas: leerEscalas(),
       stock: Math.max(0, parseInt($('e-stock').value, 10) || 0),
       unidad: $('e-unidad').value.trim(),
       norma: $('e-norma').value.trim(),

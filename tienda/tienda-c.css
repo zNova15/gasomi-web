@@ -144,3 +144,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .depto-n { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
 .ver-mas-wrap { display: flex; justify-content: center; margin-top: 28px; }
 .f-sub { padding: 6px 10px 6px 18px; font-size: 0.82rem; font-weight: 500; }
+/* Escalas de precio por cantidad */
+.escalas { margin: 10px 0 4px; }
+.escalas table { border-collapse: collapse; font-size: 0.84rem; min-width: 260px; }
+.escalas th { text-align: left; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding: 4px 12px 4px 0; border-bottom: 1px solid var(--line); }
+.escalas td { padding: 5px 12px 5px 0; border-bottom: 1px solid var(--surface-low); color: var(--on-surface); }
+.escalas td:last-child { font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--primary); }
+.esc-ahorro { font-size: 0.72rem; color: #1a7f42; font-weight: 700; margin-left: 6px; }
+.mayor-line small { font-weight: 500; color: var(--muted); }
+.d-sig { font-size: 0.68rem; color: #8a6400; margin-top: 2px; }

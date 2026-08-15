@@ -28,8 +28,11 @@
   var catIdx = {};
   function rebuild() {
     byId = {}; catIdx = {};
+    var activas = {};
+    data.categorias = data.categorias.filter(function (c) { return c.activa !== false; });
+    data.categorias.forEach(function (c, i) { catIdx[c.slug] = i; activas[c.slug] = true; });
+    data.productos = data.productos.filter(function (p) { return activas[p.categoria]; });
     data.productos.forEach(function (p) { byId[p.id] = p; });
-    data.categorias.forEach(function (c, i) { catIdx[c.slug] = i; });
   }
   rebuild();
 
@@ -67,9 +70,23 @@
   }
   function precio(p) { return p.precio != null ? p.precio : p.precio_ref_soles; }
   function stockDe(p) { return p.stock != null ? p.stock : 99; }
-  function tieneMayor(p) { return p.precio_mayor > 0 && p.precio_mayor < precio(p); }
+  function escalasDe(p) {
+    var e = Array.isArray(p.escalas) ? p.escalas : [];
+    e = e.filter(function (t) { return t && t.desde > 1 && t.precio > 0 && t.precio < precio(p); })
+      .sort(function (a, b) { return a.desde - b.desde; });
+    if (!e.length && p.precio_mayor > 0 && p.precio_mayor < precio(p)) e = [{ desde: p.mayor_desde || 12, precio: p.precio_mayor }];
+    return e;
+  }
+  function tieneMayor(p) { return escalasDe(p).length > 0; }
   function precioAplicado(p, qty) {
-    return (tieneMayor(p) && qty >= p.mayor_desde) ? p.precio_mayor : precio(p);
+    var e = escalasDe(p), pr = precio(p);
+    for (var i = 0; i < e.length; i++) { if (qty >= e[i].desde) pr = e[i].precio; }
+    return pr;
+  }
+  function tramoDe(p, qty) {
+    var e = escalasDe(p), t = null;
+    for (var i = 0; i < e.length; i++) { if (qty >= e[i].desde) t = e[i]; }
+    return t;
   }
   function tintOf(p) { return TINTS[(catIdx[p.categoria] || 0) % 4]; }
   function imgSrc(p) {
@@ -172,8 +189,20 @@
       '</div>';
   }
   function mayorLine(p) {
-    if (!tieneMayor(p)) return '';
-    return '<span class="mayor-line">Por mayor (' + p.mayor_desde + '+): ' + fmt(p.precio_mayor) + '</span>';
+    var e = escalasDe(p);
+    if (!e.length) return '';
+    var t = e[0];
+    return '<span class="mayor-line" title="Precios por volumen">Por mayor desde ' + t.desde + ': ' + fmt(t.precio) + (e.length > 1 ? ' <small>· hasta ' + fmt(e[e.length - 1].precio) + ' (' + e[e.length - 1].desde + '+)</small>' : '') + '</span>';
+  }
+  function tablaEscalas(p) {
+    var e = escalasDe(p);
+    if (!e.length) return '';
+    var filas = '<tr><td>1 – ' + (e[0].desde - 1) + '</td><td>' + fmt(precio(p)) + '</td></tr>' +
+      e.map(function (t, i) {
+        var hasta = e[i + 1] ? (e[i + 1].desde - 1) : null;
+        return '<tr><td>' + t.desde + (hasta ? ' – ' + hasta : '+') + '</td><td>' + fmt(t.precio) + '<span class="esc-ahorro"> −' + Math.round((1 - t.precio / precio(p)) * 100) + '%</span></td></tr>';
+      }).join('');
+    return '<div class="escalas"><div class="f-label">Precio por cantidad</div><table><thead><tr><th>Cantidad</th><th>Precio c/u</th></tr></thead><tbody>' + filas + '</tbody></table></div>';
   }
 
   function renderDeptos() {
@@ -242,8 +271,9 @@
       var p = byId[id];
       var q = state.cart[id];
       var pu = precioAplicado(p, q);
-      var esMayor = tieneMayor(p) && q >= p.mayor_desde;
+      var esMayor = !!tramoDe(p, q);
       var sub = pu * q;
+      var sig = escalasDe(p).filter(function (t) { return t.desde > q; })[0];
       totalBruto += sub;
       count += q;
       var u = norm(p.nombre).indexOf(norm(p.unidad)) === -1 ? ' (' + p.unidad + ')' : '';
@@ -251,7 +281,8 @@
       itemsPayload.push({ id: p.id, nombre: p.nombre, qty: q, precio: pu, mayor: esMayor, subtotal: +sub.toFixed(2) });
       return '<div class="d-item">' +
         '<div class="d-info"><div class="d-nombre">' + esc(p.nombre) + '</div>' +
-        '<div class="d-meta">' + fmt(pu) + ' · ' + esc(p.unidad) + (esMayor ? '<span class="d-mayor">por mayor</span>' : '') + '</div></div>' +
+        '<div class="d-meta">' + fmt(pu) + ' · ' + esc(p.unidad) + (esMayor ? '<span class="d-mayor">por mayor</span>' : '') + '</div>' +
+        (sig ? '<div class="d-sig">Lleva ' + sig.desde + '+ y paga ' + fmt(sig.precio) + ' c/u</div>' : '') + '</div>' +
         '<div class="step"><button data-dec="' + esc(id) + '">−</button><span>' + q + '</span><button data-inc="' + esc(id) + '">+</button></div>' +
         '<div class="d-sub">' + fmt(sub) + '</div>' +
         '<button class="d-x" data-del="' + esc(id) + '">✕</button>' +
@@ -372,7 +403,8 @@
       mod(t.dataset.add, 1);
       var p = byId[t.dataset.add];
       var q = state.cart[t.dataset.add] || 0;
-      if (p && tieneMayor(p) && q === p.mayor_desde) toast('¡Precio por mayor aplicado! ' + fmt(p.precio_mayor) + ' c/u');
+      var tr = p ? tramoDe(p, q) : null;
+      if (tr && tr.desde === q) toast('¡Precio por mayor aplicado! ' + fmt(tr.precio) + ' c/u');
       else toast('Agregado: ' + p.nombre);
       return;
     }
@@ -463,7 +495,7 @@
     if (el('p-add')) el('p-add').setAttribute('data-add-modal', p.id);
     if (el('p-precio')) el('p-precio').textContent = fmt(precio(p));
     if (el('p-mayor')) {
-      el('p-mayor').innerHTML = mayorLine(p);
+      el('p-mayor').innerHTML = tablaEscalas(p);
       el('p-mayor').style.display = tieneMayor(p) ? 'block' : 'none';
     }
     if (el('p-stock')) {

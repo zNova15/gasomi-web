@@ -7,7 +7,7 @@
     <meta name="description" content="Panel de administración de la Tienda EPP de Gasomi Ingenieros: productos, precios, pedidos e historial.">
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="../logo-gasomi.png">
-    <link rel="stylesheet" href="crm.css?v=8">
+    <link rel="stylesheet" href="crm.css?v=9">
 </head>
 <body>
     <!-- ===== LOGIN ===== -->
@@ -53,6 +53,7 @@
                 <button class="side-link" data-view="pedidos">Pedidos <span class="side-badge" id="badge-pedidos" style="display:none">0</span></button>
                 <button class="side-link" data-view="clientes">Clientes y puntos</button>
                 <button class="side-link" data-view="productos">Productos y stock</button>
+                <button class="side-link solo-admin" data-view="deptos">Departamentos</button>
                 <button class="side-link solo-admin" data-view="historial">Historial de precios</button>
                 <button class="side-link solo-admin" data-view="equipo">Equipo</button>
             </nav>
@@ -149,6 +150,11 @@
                     </div>
                 </header>
                 <div class="chips" id="prod-chips"></div>
+                <div class="v-row masivo solo-admin" id="prod-masivo" style="margin:0 0 12px">
+                    <span class="pl-sub" id="prod-masivo-txt"></span>
+                    <button class="btn-ghost btn-mini" id="prod-act-todos">Mostrar todos los filtrados</button>
+                    <button class="btn-ghost btn-mini" id="prod-des-todos">Ocultar todos los filtrados</button>
+                </div>
                 <div class="tabla-wrap">
                     <table class="tabla" id="prod-tabla">
                         <thead><tr>
@@ -174,6 +180,20 @@
                         <thead><tr><th>Cliente</th><th>Contacto</th><th>Empresa</th><th>Puntos</th><th>Registro</th><th></th></tr></thead>
                         <tbody id="cli-tbody"></tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- Departamentos -->
+            <section class="view" id="view-deptos" style="display:none">
+                <header class="view-head"><h2>Departamentos</h2><span class="view-sub">Activa o oculta secciones completas de la tienda según lo que vayan teniendo en stock</span></header>
+                <div class="deptos-crm" id="deptos-crm"></div>
+                <div class="panel" style="margin-top:14px">
+                    <h3>Nuevo departamento</h3>
+                    <div class="v-row equipo-form">
+                        <input type="text" id="dep-nombre" placeholder="Nombre (ej: Soldadura)">
+                        <input type="text" id="dep-desc" placeholder="Descripción corta" style="max-width:360px">
+                        <button class="btn-primary btn-mini" id="dep-add">Crear</button>
+                    </div>
                 </div>
             </section>
 
@@ -223,8 +243,17 @@
                 <label>Subcategoría<input type="text" id="e-subcategoria" list="subcats-list" placeholder="Ej: Martillos y combas"><datalist id="subcats-list"></datalist></label>
                 <label>Precio unidad (S/)<input type="number" step="0.10" min="0" id="e-precio"></label>
                 <label>Costo (S/) — interno<input type="number" step="0.10" min="0" id="e-costo"></label>
-                <label>Precio por mayor (S/) — 0 = sin mayoreo<input type="number" step="0.10" min="0" id="e-precio-mayor"></label>
-                <label>Por mayor desde (unidades)<input type="number" step="1" min="2" id="e-mayor-desde"></label>
+                <div class="span2 escalas-editor">
+                    <div class="esc-head">
+                        <span>Precios por mayor (escalas por cantidad)</span>
+                        <div class="v-row" style="margin:0">
+                            <button class="btn-ghost btn-mini" id="e-esc-sugerir" type="button" title="Genera 3 tramos según el precio unitario">✨ Sugerir</button>
+                            <button class="btn-ghost btn-mini" id="e-esc-add" type="button">+ Tramo</button>
+                        </div>
+                    </div>
+                    <div id="e-escalas"></div>
+                    <div class="pl-sub">Ej: desde 12 → S/ 3.50 · desde 50 → S/ 3.20 · desde 100 → S/ 2.90. Déjalo vacío si no hay precio por mayor.</div>
+                </div>
                 <label>Stock (unidades)<input type="number" step="1" min="0" id="e-stock"></label>
                 <label>Unidad<input type="text" id="e-unidad"></label>
                 <div class="span2 margen-hint" id="e-margen"></div>
@@ -260,6 +289,6 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
-    <script src="crm.js?v=8"></script>
+    <script src="crm.js?v=9"></script>
 </body>
 </html>
