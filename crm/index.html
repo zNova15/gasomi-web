@@ -7,7 +7,7 @@
     <meta name="description" content="Panel de administración de la Tienda EPP de Gasomi Ingenieros: productos, precios, pedidos e historial.">
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="../logo-gasomi.png">
-    <link rel="stylesheet" href="crm.css?v=10">
+    <link rel="stylesheet" href="crm.css?v=11">
 </head>
 <body>
     <!-- ===== LOGIN ===== -->
@@ -228,8 +228,15 @@
                         <label>Titular<input type="text" id="cf-tr-tit"></label>
                     </div>
                     <div class="panel">
-                        <h3>Tarjeta y contra entrega</h3>
-                        <label class="check"><input type="checkbox" id="cf-tj-on"> Tarjeta (link de pago por WhatsApp)</label>
+                        <h3>Pagos online (Culqi)</h3>
+                        <p class="pl-sub">Yape con confirmación inmediata y tarjeta. Pega la <b>llave pública</b> de tu cuenta Culqi (pk_test_… o pk_live_…). La llave secreta va en Vercel, nunca aquí.</p>
+                        <label class="check"><input type="checkbox" id="cf-yo-on"> Yape online (confirmación automática)</label>
+                        <label class="check"><input type="checkbox" id="cf-tj-on"> Tarjeta (Visa/Mastercard)</label>
+                        <label>Llave pública Culqi<input type="text" id="cf-tj-pk" placeholder="pk_live_xxxxxxxx"></label>
+                        <label class="check"><input type="checkbox" id="cf-demo"> Modo demostración (simula pagos, sin cobrar)</label>
+                    </div>
+                    <div class="panel">
+                        <h3>Contra entrega</h3>
                         <label class="check"><input type="checkbox" id="cf-ce-on"> Contra entrega</label>
                         <label>Nota contra entrega<input type="text" id="cf-ce-nota"></label>
                         <label>WhatsApp de pedidos (51…)<input type="text" id="cf-wa"></label>
@@ -337,6 +344,6 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
-    <script src="crm.js?v=10"></script>
+    <script src="crm.js?v=11"></script>
 </body>
 </html>

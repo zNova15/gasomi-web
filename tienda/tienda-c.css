@@ -220,3 +220,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .btn-google { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: #fff; color: var(--on-surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 20px; font-family: 'Manrope', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s ease; }
 .btn-google:hover { border-color: #4285F4; box-shadow: 0 4px 16px rgba(66, 133, 244, 0.18); }
 @media (max-width: 900px) { .pago-grid { grid-template-columns: 1fr; } .pago-resumen { position: static; } .pago-row { grid-template-columns: 1fr; } .pago-check { padding-top: 0; } }
+/* Pago online */
+.online-box { display: flex; gap: 14px; align-items: flex-start; }
+.online-ico { width: 44px; height: 44px; object-fit: contain; border-radius: 10px; flex-shrink: 0; }
+.online-box b { color: var(--primary); }
+.online-box p { margin-top: 4px; }
+.metodo small { display: block; }
+.pago-conf { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; background: var(--surface-low); border-radius: 12px; padding: 14px 16px; }
+.pago-conf b { display: block; color: var(--primary); font-family: 'Manrope', sans-serif; word-break: break-all; }
+.ok-txt { color: #1a7f42 !important; }

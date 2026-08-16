@@ -206,7 +206,10 @@
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gasomi_pedidos' }, function (p) {
         refrescar('Nuevo pedido #' + (p.new ? p.new.id : '') + ' — stock actualizado');
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'gasomi_pedidos' }, function () { refrescar(null); })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'gasomi_pedidos' }, function (p) {
+        var pagoNuevo = p.new && p.old && p.new.pago_estado === 'pagado' && p.old.pago_estado !== 'pagado' && p.new.pago_ref;
+        refrescar(pagoNuevo ? '💰 Pago online recibido — pedido #' + p.new.id + ' (' + fmt(p.new.total) + ')' : null);
+      })
       .subscribe();
     db.channel('crm-productos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gasomi_productos' }, function () { refrescar(null); })
@@ -494,7 +497,7 @@
       var origen = '<span class="tag-origen' + (p.origen === 'mostrador' ? ' mostrador' : '') + '">' + (p.origen === 'mostrador' ? 'Mostrador' : 'Tienda web') + '</span>';
       var deuda = deudaDe(p);
       var pagoBadge = p.pago_estado === 'pagado'
-        ? '<span class="pago-badge ok">Pagado' + (p.pago_metodo ? ' · ' + esc(p.pago_metodo) : '') + '</span>'
+        ? '<span class="pago-badge ok">' + (p.pago_ref ? '⚡ Pagado online' : 'Pagado') + (p.pago_metodo ? ' · ' + esc(p.pago_metodo) : '') + '</span>'
         : '<span class="pago-badge deuda">Debe ' + fmt(deuda) + '</span>';
       var waBtns = wa ? '<div class="wa-plantillas">' +
         '<a target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola ' + (c.nombre || '') + '! Confirmamos tu pedido #' + p.id + ' por ' + fmt(p.total) + '. Coordinamos la entrega. — Gasomi Ingenieros') + '">Confirmar 💬</a>' +
@@ -522,6 +525,7 @@
           (p.comprobante_tipo === 'factura' ? '<span>🧾 Factura RUC ' + esc(p.cliente_ruc) + '</span>' : '') +
           (p.comprobante_url ? '<a class="comp-link" href="#" data-comp="' + esc(p.comprobante_url) + '">📎 Ver comprobante</a>' : '') +
           '</div>' : '') +
+        (p.pago_ref ? '<div class="pl-sub" style="margin-top:6px">Ref. pago: ' + esc(p.pago_ref) + (p.pago_pasarela === 'demo' ? ' (demo)' : '') + (p.pagado_at ? ' · ' + fecha(p.pagado_at) : '') + '</div>' : '') +
         (p.vendedor_email ? '<div class="pl-sub" style="margin-top:6px">Vendedor: ' + esc(p.vendedor_email) + '</div>' : '') +
         waBtns +
         '<div class="pedido-items">' + items + '</div></div>';
@@ -658,7 +662,8 @@
     $('cf-plin-on').checked = pl.activo !== false; $('cf-plin-num').value = pl.numero || ''; $('cf-plin-tit').value = pl.titular || '';
     $('cf-plin-prev').innerHTML = pl.qr ? '<img src="' + esc(pl.qr) + '" alt="QR Plin">' : '';
     $('cf-tr-on').checked = tr.activo !== false; $('cf-tr-banco').value = tr.banco || ''; $('cf-tr-cuenta').value = tr.cuenta || ''; $('cf-tr-cci').value = tr.cci || ''; $('cf-tr-tit').value = tr.titular || '';
-    $('cf-tj-on').checked = !!tj.activo; $('cf-ce-on').checked = ce.activo !== false; $('cf-ce-nota').value = ce.nota || ''; $('cf-wa').value = pg.whatsapp || '';
+    $('cf-tj-on').checked = !!tj.activo; $('cf-tj-pk').value = tj.public_key || ''; $('cf-yo-on').checked = !!(pg.yape_online && pg.yape_online.activo); $('cf-demo').checked = !!pg.demo;
+    $('cf-ce-on').checked = ce.activo !== false; $('cf-ce-nota').value = ce.nota || ''; $('cf-wa').value = pg.whatsapp || '';
     var rc = ev.recojo || {}, ob = ev.obra || {};
     $('cf-rec-dir').value = rc.direccion || ''; $('cf-rec-hor').value = rc.horario || ''; $('cf-obra-nota').value = ob.nota || ''; $('cf-gratis').value = ev.gratis_desde || '';
   }
@@ -677,7 +682,9 @@
       yape: Object.assign(y, { activo: $('cf-yape-on').checked, numero: $('cf-yape-num').value.trim(), titular: $('cf-yape-tit').value.trim() }),
       plin: Object.assign(pl, { activo: $('cf-plin-on').checked, numero: $('cf-plin-num').value.trim(), titular: $('cf-plin-tit').value.trim() }),
       transferencia: { activo: $('cf-tr-on').checked, banco: $('cf-tr-banco').value.trim(), cuenta: $('cf-tr-cuenta').value.trim(), cci: $('cf-tr-cci').value.trim(), titular: $('cf-tr-tit').value.trim() },
-      tarjeta: Object.assign({}, pg.tarjeta || {}, { activo: $('cf-tj-on').checked }),
+      tarjeta: Object.assign({}, pg.tarjeta || {}, { activo: $('cf-tj-on').checked, proveedor: 'culqi', public_key: $('cf-tj-pk').value.trim() }),
+      yape_online: { activo: $('cf-yo-on').checked },
+      demo: $('cf-demo').checked,
       contra_entrega: { activo: $('cf-ce-on').checked, nota: $('cf-ce-nota').value.trim() },
       whatsapp: $('cf-wa').value.replace(/\D/g, '') || '51958682246'
     };
