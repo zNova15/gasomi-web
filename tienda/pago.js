@@ -212,28 +212,28 @@
       msg.textContent = resR.error || 'El pago no se completó.'; btn.disabled = false; btn.textContent = 'Reintentar pago'; return;
     }
 
-    var uid = null;
-    try { var s = await db.auth.getSession(); uid = s.data.session ? s.data.session.user.id : null; } catch (e) {}
     var payload = {
-      items: totales.items, total: totales.total, origen: 'tienda',
-      cliente_id: uid,
+      items: totales.items.map(function (i) { return { id: i.id, qty: i.qty }; }),
       cliente_nombre: nombre, cliente_telefono: tel, cliente_email: $('f-email').value.trim(),
       cliente_empresa: $('f-empresa').value.trim(), cliente_ruc: factura ? ruc : '',
       comprobante_tipo: factura ? 'factura' : 'boleta',
       entrega: st.entrega, direccion: st.entrega === 'obra' ? $('f-direccion').value.trim() : '',
-      pago_metodo: st.pago, pago_estado: 'pendiente', monto_pagado: 0,
-      puntos_canjeados: uid ? totales.puntos : 0, descuento: uid ? totales.desc : 0,
-      nota: (uid && totales.desc > 0 ? 'Canjea ' + totales.puntos + ' puntos (−' + fmt(totales.desc) + ')' : '')
+      pago_metodo: st.pago,
+      puntos_canjeados: totales.puntos
     };
     var r;
-    try { r = await db.from('gasomi_pedidos').insert(payload).select(); }
+    try { r = await db.rpc('gasomi_crear_pedido', { p: payload }); }
     catch (e) { r = { error: { message: 'sin conexión a internet' } }; }
-    if (r.error || !r.data || !r.data.length) {
-      msg.textContent = 'No se pudo registrar el pedido: ' + (r.error ? r.error.message : 'intenta de nuevo');
+    if (r.error || !r.data || !r.data.id) {
+      msg.textContent = 'No se pudo registrar el pedido: ' + (r.error ? r.error.message.replace(/^.*?: /, '') : 'intenta de nuevo');
       btn.disabled = false; btn.textContent = 'Confirmar pedido';
       return;
     }
-    var ped = r.data[0];
+    // el servidor recalculó el total con precios reales
+    totales.total = +r.data.total; totales.desc = +r.data.descuento; totales.puntos = r.data.puntos;
+    payload.direccion = payload.direccion || '';
+    payload.cliente_empresa = payload.cliente_empresa || '';
+    var ped = { id: r.data.id, total: +r.data.total };
     if (st.pago === 'yape_online' || st.pago === 'tarjeta') {
       btn.textContent = 'Abriendo pago seguro…';
       var res = await cobrarOnline(ped, nombre);

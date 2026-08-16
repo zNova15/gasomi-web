@@ -48,17 +48,11 @@
     try {
       var pedido = window.__gasomiPedidoActual;
       if (!pedido || !pedido.items.length) return;
-      var uid = null;
-      try {
-        var s = await db.auth.getSession();
-        uid = s.data.session ? s.data.session.user.id : null;
-      } catch (e2) {}
-      db.from('gasomi_pedidos').insert({
-        items: pedido.items,
-        total: pedido.total,
-        nota: pedido.nota || '',
-        cliente_id: uid
-      }).then(function () {});
+      db.rpc('gasomi_crear_pedido', { p: {
+        items: pedido.items.map(function (i) { return { id: i.id, qty: i.qty }; }),
+        pago_metodo: 'whatsapp', entrega: 'recojo',
+        puntos_canjeados: 0
+      } }).then(function () {});
     } catch (err) { /* nunca bloquear el envío por WhatsApp */ }
   });
 })();
