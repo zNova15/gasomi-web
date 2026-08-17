@@ -522,7 +522,7 @@
           (p.cliente_nombre ? '<span><b>' + esc(p.cliente_nombre) + '</b>' + (p.cliente_empresa ? ' · ' + esc(p.cliente_empresa) : '') + '</span>' : '') +
           (p.cliente_telefono ? '<span>📱 ' + esc(p.cliente_telefono) + '</span>' : '') +
           '<span>' + (p.entrega === 'obra' ? '🚚 Obra: ' + esc(p.direccion) : '🏬 Recojo en tienda') + '</span>' +
-          (p.comprobante_tipo === 'factura' ? '<span>🧾 Factura RUC ' + esc(p.cliente_ruc) + '</span>' : '') +
+          (p.comprobante_tipo === 'factura' ? '<span>🧾 Factura · RUC ' + esc(p.cliente_ruc) + (p.cliente_razon_social ? ' · ' + esc(p.cliente_razon_social) : '') + '</span>' : (p.cliente_dni ? '<span>🧾 Boleta · DNI ' + esc(p.cliente_dni) + '</span>' : '')) +
           (p.comprobante_url ? '<a class="comp-link" href="#" data-comp="' + esc(p.comprobante_url) + '">📎 Ver comprobante</a>' : '') +
           '</div>' : '') +
         (p.pago_ref ? '<div class="pl-sub" style="margin-top:6px">Ref. pago: ' + esc(p.pago_ref) + (p.pago_pasarela === 'demo' ? ' (demo)' : '') + (p.pagado_at ? ' · ' + fecha(p.pagado_at) : '') + '</div>' : '') +
@@ -594,6 +594,7 @@
       '<label>Nombre<input type="text" id="ce-nombre" value="' + esc(c.nombre) + '"></label>' +
       '<label>Teléfono<input type="text" id="ce-telefono" value="' + esc(c.telefono) + '"></label>' +
       '<label>Empresa<input type="text" id="ce-empresa" value="' + esc(c.empresa) + '"></label>' +
+      '<label>DNI<input type="text" id="ce-dni" value="' + esc(c.dni || '') + '"></label>' +
       '<label>RUC<input type="text" id="ce-ruc" value="' + esc(c.ruc || '') + '"></label>' +
       '<label class="span2">Dirección / obra<input type="text" id="ce-direccion" value="' + esc(c.direccion || '') + '"></label>' +
       '<label>Etiqueta<select id="ce-etiqueta"><option value="">—</option>' + ['vip', 'constructora', 'nuevo', 'moroso'].map(function (e) { return '<option value="' + e + '"' + (c.etiqueta === e ? ' selected' : '') + '>' + e + '</option>'; }).join('') + '</select></label>' +
@@ -886,7 +887,7 @@
     if (d.cliVer) { abrirCliente(d.cliVer); return; }
     if (d.clif) { state.cliF = d.clif; renderClientes(); return; }
     if (d.cliGuardar) {
-      var patchC = { nombre: $('ce-nombre').value.trim(), telefono: $('ce-telefono').value.trim(), empresa: $('ce-empresa').value.trim(), ruc: $('ce-ruc').value.trim(), direccion: $('ce-direccion').value.trim(), etiqueta: $('ce-etiqueta').value, notas: $('ce-notas').value.trim() };
+      var patchC = { nombre: $('ce-nombre').value.trim(), telefono: $('ce-telefono').value.trim(), empresa: $('ce-empresa').value.trim(), ruc: $('ce-ruc').value.trim(), dni: $('ce-dni').value.trim(), direccion: $('ce-direccion').value.trim(), etiqueta: $('ce-etiqueta').value, notas: $('ce-notas').value.trim() };
       var rC = await db.from('gasomi_clientes').update(patchC).eq('user_id', d.cliGuardar).select();
       if (rC.error || !rC.data.length) { toast('No se pudo guardar', true); return; }
       var iC = state.clientes.findIndex(function (x) { return x.user_id === d.cliGuardar; });
@@ -996,8 +997,9 @@
       '<div class="cab"><div><h1>GASOMI INGENIEROS E.I.R.L.</h1>' +
       '<div class="emp">RUC 20600097726<br>Jr. Puyllucana N° 391, Baños del Inca, Cajamarca<br>WhatsApp +51 958 682 246</div></div>' +
       '<div class="doc"><b>NOTA DE VENTA<br>NV-' + String(p.id).padStart(6, '0') + '</b><span>' + fecha(p.created_at) + '</span></div></div>' +
-      '<div class="meta"><b>Cliente:</b> ' + esc(c ? ((c.nombre || c.email) + (c.empresa ? ' · ' + c.empresa : '')) : 'Venta de mostrador') +
-      (c && c.telefono ? ' · ' + esc(c.telefono) : '') + '<br>' +
+      '<div class="meta"><b>Cliente:</b> ' + esc(p.cliente_nombre || (c ? ((c.nombre || c.email) + (c.empresa ? ' · ' + c.empresa : '')) : 'Venta de mostrador')) +
+      (p.cliente_telefono || (c && c.telefono) ? ' · ' + esc(p.cliente_telefono || c.telefono) : '') +
+      (p.comprobante_tipo === 'factura' && p.cliente_ruc ? '<br><b>Factura:</b> RUC ' + esc(p.cliente_ruc) + ' · ' + esc(p.cliente_razon_social || '') : (p.cliente_dni ? '<br><b>Boleta:</b> DNI ' + esc(p.cliente_dni) : '')) + '<br>' +
       '<b>Origen:</b> ' + (p.origen === 'mostrador' ? 'Mostrador' : 'Tienda online') +
       (p.vendedor_email ? ' · <b>Vendedor:</b> ' + esc(p.vendedor_email) : '') + '</div>' +
       '<table><thead><tr><th>Cant.</th><th>Producto</th><th class="der">P. unit.</th><th class="der">Importe</th></tr></thead><tbody>' + filas + '</tbody></table>' +

@@ -166,7 +166,13 @@
     if (t.id === 'pago-login-btn') { $('cuenta-btn').click(); }
   });
   document.addEventListener('change', function (e) {
-    if (e.target.name === 'comp') $('ruc-wrap').style.display = e.target.value === 'factura' ? 'block' : 'none';
+    if (e.target.name === 'comp') {
+      var esF = e.target.value === 'factura';
+      $('boleta-wrap').style.display = esF ? 'none' : 'grid';
+      $('factura-wrap').style.display = esF ? 'grid' : 'none';
+      $('tab-boleta').classList.toggle('on', !esF); $('tab-factura').classList.toggle('on', esF);
+      if (esF && !$('f-razon').value && $('f-empresa').value) $('f-razon').value = $('f-empresa').value;
+    }
     if (e.target.id === 'comprobante') { st.comprobanteFile = e.target.files[0] || null; var n = $('comp-nombre'); if (n) n.textContent = st.comprobanteFile ? '✓ ' + st.comprobanteFile.name : ''; }
   });
 
@@ -178,6 +184,8 @@
     if (!$('f-telefono').value) $('f-telefono').value = c.telefono || '';
     if (!$('f-email').value) $('f-email').value = c.email || '';
     if (!$('f-empresa').value) $('f-empresa').value = c.empresa || '';
+    if (!$('f-dni').value && c.dni) $('f-dni').value = c.dni;
+    if (!$('f-ruc').value && c.ruc) $('f-ruc').value = c.ruc;
     $('pago-login-hint').style.display = 'none';
   }
   window.__gasomiOnCliente = function () { prellenar(); pintarResumen(); };
@@ -199,11 +207,15 @@
     msg.textContent = '';
     var nombre = $('f-nombre').value.trim(), tel = $('f-telefono').value.trim();
     var factura = document.querySelector('input[name=comp]:checked').value === 'factura';
-    var ruc = $('f-ruc').value.trim();
+    var ruc = $('f-ruc').value.replace(/\D/g, '');
+    var dni = $('f-dni').value.replace(/\D/g, '');
+    var razon = $('f-razon').value.trim();
     if (!totales.items.length) { msg.textContent = 'Tu carrito está vacío.'; return; }
     if (nombre.length < 3) { msg.textContent = 'Escribe tu nombre completo.'; $('f-nombre').focus(); return; }
     if (tel.replace(/\D/g, '').length < 9) { msg.textContent = 'Escribe un WhatsApp válido (9 dígitos).'; $('f-telefono').focus(); return; }
-    if (factura && !/^\d{11}$/.test(ruc)) { msg.textContent = 'Para factura necesitamos un RUC de 11 dígitos.'; $('f-ruc').focus(); return; }
+    if (!factura && dni.length !== 8) { msg.textContent = 'Para la boleta necesitamos tu DNI (8 dígitos).'; $('f-dni').focus(); return; }
+    if (factura && ruc.length !== 11) { msg.textContent = 'Para factura necesitamos un RUC de 11 dígitos.'; $('f-ruc').focus(); return; }
+    if (factura && razon.length < 3) { msg.textContent = 'Indica la razón social de la empresa.'; $('f-razon').focus(); return; }
     if (st.entrega === 'obra' && $('f-direccion').value.trim().length < 6) { msg.textContent = 'Indica la dirección de la obra.'; $('f-direccion').focus(); return; }
     var btn = $('confirmar'); btn.disabled = true; btn.textContent = 'Registrando…';
     if (st.pedidoPendiente && (st.pago === 'yape_online' || st.pago === 'tarjeta')) {
@@ -216,6 +228,7 @@
       items: totales.items.map(function (i) { return { id: i.id, qty: i.qty }; }),
       cliente_nombre: nombre, cliente_telefono: tel, cliente_email: $('f-email').value.trim(),
       cliente_empresa: $('f-empresa').value.trim(), cliente_ruc: factura ? ruc : '',
+      cliente_dni: factura ? '' : dni, cliente_razon_social: factura ? razon : '',
       comprobante_tipo: factura ? 'factura' : 'boleta',
       entrega: st.entrega, direccion: st.entrega === 'obra' ? $('f-direccion').value.trim() : '',
       pago_metodo: st.pago,
@@ -254,7 +267,7 @@
     var texto = 'Hola Gasomi, acabo de hacer el pedido #' + ped.id + ' en la tienda online:\n' + totales.lines.join('\n') +
       (totales.desc > 0 ? '\nDescuento por puntos: −' + fmt(totales.desc) : '') +
       '\nTotal: ' + fmt(totales.total) + '\nPago: ' + metodoTxt + '\nEntrega: ' + (st.entrega === 'obra' ? 'en obra — ' + payload.direccion : 'recojo en tienda') +
-      '\nA nombre de: ' + nombre + (payload.cliente_empresa ? ' · ' + payload.cliente_empresa : '') + (factura ? ' · Factura RUC ' + ruc : '') +
+      '\nA nombre de: ' + nombre + (payload.cliente_empresa ? ' · ' + payload.cliente_empresa : '') + (factura ? ' · Factura RUC ' + ruc + ' (' + razon + ')' : ' · Boleta DNI ' + dni) +
       (comp ? '\n(Comprobante adjunto en la web)' : (st.pago === 'yape' || st.pago === 'plin' || st.pago === 'transferencia' ? '\nTe envío el comprobante aquí 👇' : ''));
     $('ok-num').textContent = '#' + ped.id;
     $('ok-texto').textContent = 'Gracias, ' + nombre.split(' ')[0] + '. Registramos tu pedido por ' + fmt(totales.total) + '. Envíanoslo por WhatsApp para confirmarte stock, envío y ' + (st.pago === 'tarjeta' ? 'recibir tu link de pago con tarjeta.' : 'coordinar el pago.');

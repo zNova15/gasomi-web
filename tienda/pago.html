@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="/tienda/logo-gasomi.png">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="/tienda/tienda.min.css?v=11">
+    <link rel="stylesheet" href="/tienda/tienda.min.css?v=12">
 </head>
 <body>
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -46,10 +46,19 @@
                         <label>Correo<input type="email" id="f-email" autocomplete="email" placeholder="para enviarte la confirmación"></label>
                         <label>Empresa u obra<input type="text" id="f-empresa" autocomplete="organization" placeholder="opcional"></label>
                     </div>
-                    <div class="pago-row">
-                        <label class="pago-check"><input type="radio" name="comp" value="boleta" checked> Boleta</label>
-                        <label class="pago-check"><input type="radio" name="comp" value="factura"> Factura (RUC)</label>
-                        <label id="ruc-wrap" style="display:none">RUC *<input type="text" id="f-ruc" inputmode="numeric" maxlength="11" placeholder="20xxxxxxxxx"></label>
+                    <div class="comp-tipo">
+                        <span class="f-label-sm">Comprobante</span>
+                        <div class="metodos comp-tabs">
+                            <label class="metodo on" id="tab-boleta"><input type="radio" name="comp" value="boleta" checked hidden><b>Boleta</b><small>persona natural · DNI</small></label>
+                            <label class="metodo" id="tab-factura"><input type="radio" name="comp" value="factura" hidden><b>Factura</b><small>empresa · RUC</small></label>
+                        </div>
+                    </div>
+                    <div class="pago-row" id="boleta-wrap">
+                        <label>DNI *<input type="text" id="f-dni" inputmode="numeric" maxlength="8" placeholder="8 dígitos" autocomplete="off"></label>
+                    </div>
+                    <div class="pago-row" id="factura-wrap" style="display:none">
+                        <label>RUC *<input type="text" id="f-ruc" inputmode="numeric" maxlength="11" placeholder="20xxxxxxxxx" autocomplete="off"></label>
+                        <label>Razón social *<input type="text" id="f-razon" placeholder="Nombre legal de la empresa" autocomplete="organization"></label>
                     </div>
                 </section>
 
@@ -109,10 +118,10 @@
     </div>
     <div class="toast" id="toast"></div>
 
-    <script src="/tienda/productos.min.js?v=11" defer></script>
+    <script src="/tienda/productos.min.js?v=12" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>
-    <script src="/tienda/live.min.js?v=11" defer></script>
-    <script src="/tienda/cuenta.min.js?v=11" defer></script>
-    <script src="/tienda/pago.min.js?v=11" defer></script>
+    <script src="/tienda/live.min.js?v=12" defer></script>
+    <script src="/tienda/cuenta.min.js?v=12" defer></script>
+    <script src="/tienda/pago.min.js?v=12" defer></script>
 </body>
 </html>

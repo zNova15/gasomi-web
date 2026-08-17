@@ -229,3 +229,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .pago-conf { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 16px; background: var(--surface-low); border-radius: 12px; padding: 14px 16px; }
 .pago-conf b { display: block; color: var(--primary); font-family: 'Manrope', sans-serif; word-break: break-all; }
 .ok-txt { color: #1a7f42 !important; }
+.comp-tipo { margin-top: 4px; }
+.f-label-sm { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.comp-tabs { grid-template-columns: repeat(2, minmax(140px, 220px)); }
+.comp-tabs .metodo { padding: 12px 10px; }
