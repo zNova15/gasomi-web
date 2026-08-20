@@ -128,11 +128,13 @@
     var c = (st.cfg || {})[st.pago] || {};
     var wa = (st.cfg && st.cfg.whatsapp) || WA_DEF;
     var html = '';
+    var avisoDemo = (st.cfg && st.cfg.demo)
+      ? '<div class="demo-aviso">⚠️ <b>Modo prueba</b> — este pago es simulado, no se cobra nada. Para pedidos reales escríbenos por WhatsApp.</div>' : '';
     if (st.pago === 'yape_online') {
-      html = '<div class="online-box"><img src="/tienda/img-ui-yape.png" alt="" class="online-ico"><div><b>Paga con Yape y tu pedido queda confirmado al instante</b>' +
+      html = avisoDemo + '<div class="online-box"><img src="/tienda/img-ui-yape.png" alt="" class="online-ico"><div><b>Paga con Yape y tu pedido queda confirmado al instante</b>' +
         '<p class="pl-sub">Al confirmar se abre una ventana segura: ingresas tu número de Yape y el <b>código de aprobación</b> (lo generas en la app Yape → menú → "Código de aprobación"). Máximo S/ 2,000 por operación.</p></div></div>';
     } else if (st.pago === 'tarjeta') {
-      html = '<div class="online-box"><span class="online-ico" style="font-size:2rem">💳</span><div><b>Pago con tarjeta — confirmación inmediata</b>' +
+      html = avisoDemo + '<div class="online-box"><span class="online-ico" style="font-size:2rem">💳</span><div><b>Pago con tarjeta — confirmación inmediata</b>' +
         '<p class="pl-sub">Visa, Mastercard, Amex y Diners. Procesado por Culqi (certificado PCI): tu tarjeta nunca pasa por nuestra web.</p></div></div>';
     } else if (st.pago === 'yape' || st.pago === 'plin') {
       html = '<div class="qr-wrap">' + (c.qr ? '<img class="qr" src="' + esc(c.qr) + '" alt="QR ' + st.pago + '">' : '<div class="qr qr-ph">QR ' + esc(st.pago === 'yape' ? 'Yape' : 'Plin') + '<small>escanea desde la app</small></div>') +

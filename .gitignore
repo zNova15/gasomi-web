@@ -4,3 +4,5 @@ nohup.out
 .venv/
 __pycache__/
 *.tmp
+.vercel
+.env*

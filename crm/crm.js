@@ -178,6 +178,11 @@
     state.pedidos = rped.data || [];
     state.clientes = rcli.data || [];
     state.tareas = rt.data || [];
+    var rbf = await db.from('gasomi_busquedas_imagen')
+      .select('id,created_at,detectado,encontrados')
+      .gte('created_at', new Date(Date.now() - 7 * 864e5).toISOString())
+      .order('created_at', { ascending: false }).limit(40);
+    state.busquedasFoto = rbf.data || [];
     if (esAdmin()) {
       var rcf = await db.from('gasomi_config').select('*');
       state.config = {};
@@ -229,6 +234,27 @@
       if (b.dataset.view === 'venta') pintarVenta();
     });
   });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-foto-abrir]');
+    if (!b || !window.GasomiFoto) return;
+    var modo = b.dataset.fotoModo;
+    window.GasomiFoto.abrir({
+      origen: 'crm',
+      onElegir: function (id) {
+        var p = prodDe(id);
+        if (modo === 'venta') {
+          ventaAdd(id, 1);
+          toast('Agregado al ticket: ' + (p ? p.nombre : id));
+        } else if (esAdmin()) {
+          abrirModal(id);
+        } else {
+          $('prod-buscar').value = p ? p.nombre : '';
+          state.q = p ? p.nombre : ''; renderProductos();
+        }
+      }
+    });
+  });
+
   function irA(view) {
     var btn = document.querySelector('.side-link[data-view="' + view + '"]');
     if (btn) btn.click();
@@ -293,6 +319,22 @@
         '<div class="pl-sub' + (vencida ? ' tarea-vencida' : '') + '">' + (t.cliente_id ? esc(nombreCliente(t.cliente_id)) + ' · ' : '') + t.fecha + (vencida ? ' · vencida' : '') + '</div></div>' +
         '<button class="btn-mini-ok" data-tarea-ok="' + t.id + '">Hecho ✓</button></div>';
     }).join('') || '<div class="pl-empty">Sin tareas pendientes. Agrega una arriba ↑</div>';
+
+    var bf = state.busquedasFoto || [];
+    $('md-fotos').innerHTML = bf.length
+      ? bf.slice(0, 8).map(function (b) {
+          var d = b.detectado || {};
+          var nom = ((d.marca ? d.marca + ' ' : '') + (d.producto || 'Producto')).trim();
+          return '<div class="pl-row">' +
+            '<div><b>' + esc(nom) + '</b>' +
+            (d.atributos && d.atributos.length ? '<div class="pl-sub">' + esc(d.atributos.slice(0, 3).join(' · ')) + '</div>' : '') +
+            '<div class="pl-sub">' + fecha(b.created_at) + '</div></div>' +
+            (b.encontrados > 0
+              ? '<span class="tag-etq">' + b.encontrados + ' en catálogo</span>'
+              : '<span class="tag-etq moroso">No lo tenemos</span>') +
+            '</div>';
+        }).join('')
+      : '<div class="pl-vacio">Todavía nadie ha buscado por foto. Cuando lo hagan, aquí verás qué productos te piden y cuáles no tienes.</div>';
 
     $('md-stock').innerHTML = bajos.slice(0, 8).map(function (p) {
       return '<div class="pl-row"><div class="pl-main">' + esc(p.nombre) + '<div class="pl-sub">' + esc(p.marca) + '</div></div>' +

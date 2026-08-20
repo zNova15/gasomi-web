@@ -7,7 +7,8 @@
     <meta name="description" content="Panel de administración de la Tienda EPP de Gasomi Ingenieros: productos, precios, pedidos e historial.">
     <meta name="robots" content="noindex">
     <link rel="icon" type="image/png" href="../logo-gasomi.png">
-    <link rel="stylesheet" href="crm.css?v=12">
+    <link rel="stylesheet" href="crm.css?v=13">
+    <link rel="stylesheet" href="../tienda/foto.css?v=13">
 </head>
 <body>
     <!-- ===== LOGIN ===== -->
@@ -91,6 +92,10 @@
                         <h3>Por agotarse</h3>
                         <div id="md-stock" class="panel-list"></div>
                     </div>
+                    <div class="panel">
+                        <h3>Lo que buscan por foto <span class="panel-hint">últimos 7 días</span></h3>
+                        <div id="md-fotos" class="panel-list"></div>
+                    </div>
                 </div>
             </section>
 
@@ -108,7 +113,10 @@
                             </div>
                         </div>
                         <div class="panel" style="margin-top:14px">
-                            <input type="text" id="v-buscar" placeholder="Busca producto: casco, guantes, arnés…" class="buscador" style="max-width:none">
+                            <div class="buscador-fila">
+                                <input type="text" id="v-buscar" placeholder="Busca producto: casco, guantes, arnés…" class="buscador" style="max-width:none">
+                                <button class="foto-btn" data-foto-abrir data-foto-origen="crm" data-foto-modo="venta" title="Buscar por foto">📷<span class="foto-txt">Buscar por foto</span></button>
+                            </div>
                             <div class="v-grid" id="v-resultados"></div>
                         </div>
                     </div>
@@ -147,6 +155,7 @@
                     <h2>Productos y stock</h2>
                     <div class="v-row" style="margin-top:0">
                         <input type="text" class="buscador" id="prod-buscar" placeholder="Buscar producto o marca…">
+                        <button class="foto-btn" data-foto-abrir data-foto-origen="crm" data-foto-modo="producto" title="Buscar por foto">📷<span class="foto-txt">Buscar por foto</span></button>
                         <button class="btn-primary btn-mini solo-admin" id="prod-nuevo">+ Nuevo producto</button>
                     </div>
                 </header>
@@ -344,6 +353,7 @@
     <div class="toast" id="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous"></script>
-    <script src="crm.js?v=12"></script>
+    <script src="../tienda/foto.min.js?v=13"></script>
+    <script src="crm.js?v=13"></script>
 </body>
 </html>

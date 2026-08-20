@@ -46,7 +46,7 @@ def head(titulo, desc, canonical, ogimg, jsonld):
     <link rel="icon" type="image/png" href="/tienda/logo-gasomi.png">
     <link rel="preload" as="image" href="/tienda/logo-gasomi.png" fetchpriority="high">
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="stylesheet" href="/tienda/tienda.min.css?v=12">
+    <link rel="stylesheet" href="/tienda/tienda.min.css?v=13">
     <script type="application/ld+json">{json.dumps(jsonld, ensure_ascii=False)}</script>
 </head>'''
 
@@ -70,6 +70,7 @@ NAV = '''<body>
             </a>
             <div class="nav-actions" style="margin-left:auto">
                 <a href="/tienda/#b2b" class="nav-link">Compra por volumen</a>
+                <button class="foto-btn" id="foto-btn" title="Buscar por foto" aria-label="Buscar por foto">📷<span class="foto-txt">Buscar por foto</span></button>
                 <button class="cuenta-btn" id="cuenta-btn">Mi cuenta</button>
                 <button class="cart-btn" id="cart-btn">Pedido <span class="cart-count" id="cart-count">0</span></button>
             </div>
@@ -126,11 +127,12 @@ def footer(extra_js=''):
     </footer>
 {COMUNES}
     <script>{extra_js}</script>
-    <script src="/tienda/productos.min.js?v=12" defer></script>
-    <script src="/tienda/app.min.js?v=12" defer></script>
+    <script src="/tienda/productos.min.js?v=13" defer></script>
+    <script src="/tienda/app.min.js?v=13" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3/dist/umd/supabase.min.js" integrity="sha384-l8ah+VgaWtk1mvOe9VC+OirC6qHFF4yH7l7mKRidV9MSti3E9F463bMp6ZVN4kuC" crossorigin="anonymous" defer></script>
-    <script src="/tienda/live.min.js?v=12" defer></script>
-    <script src="/tienda/cuenta.min.js?v=12" defer></script>
+    <script src="/tienda/live.min.js?v=13" defer></script>
+    <script src="/tienda/cuenta.min.js?v=13" defer></script>
+    <script src="/tienda/foto.min.js?v=13" defer></script>
 </body>
 </html>
 '''
